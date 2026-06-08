@@ -9,7 +9,7 @@
 
 A skill + agent system that uses Claude's vision AI to review batches of property photography and select the best hero image — the lead shot that goes on the website, email, Instagram, and MLS listing.
 
-Built for **Mica** to run independently. Designed around **Trent's** eye. Final sign-off always stays with Trent.
+Built for anyone to run independently. Designed around **Trent's** eye. Final sign-off always stays with Trent.
 
 The system knows what West Coast Modern looks for: architect-designed homes with cinematic West Coast light, warm materiality, breathing room, and an emotional hook. It scores every image against a rubric and returns a production-ready report.
 
@@ -48,7 +48,7 @@ That's it. No API keys, no Make.com, no configuration.
 
 ---
 
-## Automated Mode (Make.com Pipeline)
+## Automated Mode (Make.com Pipeline) <-- Out Side Current SOW
 
 For production use — triggers automatically when a photographer uploads to Dropbox:
 
@@ -92,7 +92,7 @@ Even 3–4 examples help. 10 examples produces output that's very close to Trent
 
 ---
 
-## Tech Stack
+## Tech Stack <-- For Auto Mode
 
 | Component | Tool |
 |---|---|
@@ -116,7 +116,7 @@ WF1: Content Consolidation
   → Curated set confirmed
 
 WF2: Content Creation
-  → Phillipe writes copy for each deliverable
+  → Copy person writes copy for each deliverable
   → Hero images matched to copy
   → Instagram, Email, Website sets prepared
 
@@ -125,28 +125,6 @@ WF3: Deployment
   → MailChimp campaign sent
   → Instagram posted on schedule
 ```
-
----
-
-## People
-
-| Person | Role |
-|---|---|
-| Trent | Creative director; completes taste reference; final hero sign-off |
-| Mica | Production manager; runs the skill; reviews and routes output |
-| Phillipe | Copywriter; receives hero-confirmed sets |
-| Jacob | Video B-roll; syncs with confirmed hero for visual consistency |
-| Charlie | Client services; shares final approved content for client review |
-
----
-
-## Status
-
-| Version | Date | Status |
-|---|---|---|
-| v1.0 | May 19 2026 | Initial skill — hero selection only |
-| v2.0 | May 28 2026 | Full agent + automation + platform sets + taste calibration system |
-| v2.1 | TBD | After Trent completes taste reference template |
 
 ---
 
