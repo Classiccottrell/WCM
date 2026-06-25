@@ -355,14 +355,37 @@ def write_csv(folder, results):
     return path
 
 
+def load_csv(path):
+    """Read triage results back from a previously written CSV. Returns list of result dicts."""
+    results = []
+    with open(path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            try:
+                score = int(row["score"])
+            except (KeyError, ValueError):
+                score = 0
+            results.append({
+                "file": row["file"],
+                "score": max(0, min(60, score)),
+                "isExterior": row.get("isExterior", "False") == "True",
+                "note": row.get("note", ""),
+            })
+    return results
+
+
 # ----------------------------------------------------------------------------
 # Orchestration
 # ----------------------------------------------------------------------------
 def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
-                   skill_path=None, images=None, skip_if_done=False):
-    """Run the full two-stage pipeline on *folder*. Returns the report path or None."""
+                   skill_path=None, images=None, skip_if_done=False, resume=False):
+    """Run the full two-stage pipeline on *folder*. Returns the report path or None.
+
+    resume=True: if triage_scores.csv already exists, reload Stage 1 from it and
+    skip directly to Stage 2. Useful when Stage 1 finished but Stage 2 failed.
+    """
     folder = Path(folder)
     report_path = folder / REPORT_NAME
+    existing_csv = folder / CSV_NAME
 
     if skip_if_done and report_path.exists():
         print("[skip] %s already has %s" % (folder, REPORT_NAME))
@@ -370,7 +393,7 @@ def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
 
     if images is None:
         images = find_images(folder)
-    if not images:
+    if not images and not (resume and existing_csv.exists()):
         sys.stderr.write("No images found in %s — nothing to do.\n" % folder)
         return None
 
@@ -383,10 +406,25 @@ def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
     skill_text = load_skill(skill_path)
     property_name = folder.name or "Untitled"
 
-    results = run_triage(client, images, workers)
+    if resume and existing_csv.exists():
+        print("--resume: loading Stage 1 scores from %s (skipping triage)." % existing_csv)
+        results = load_csv(existing_csv)
+        if not results:
+            sys.stderr.write("WARNING: %s is empty — falling back to full triage.\n"
+                             % existing_csv)
+            results = run_triage(client, images, workers)
+    else:
+        if resume:
+            print("--resume: no existing %s found — running full triage." % CSV_NAME)
+        if not images:
+            sys.stderr.write("No images found in %s — nothing to do.\n" % folder)
+            return None
+        results = run_triage(client, images, workers)
+
     results.sort(key=lambda r: (-r["score"], r["file"].lower()))
-    csv_path = write_csv(folder, results)
-    print("Wrote %s" % csv_path)
+    if not (resume and existing_csv.exists() and results):
+        csv_path = write_csv(folder, results)
+        print("Wrote %s" % csv_path)
 
     top = results[:top_n]
     print("\nTop %d candidates:" % len(top))
@@ -412,6 +450,9 @@ def main(argv=None):
                     help="Parallel triage workers (default %d)" % DEFAULT_WORKERS)
     ap.add_argument("--skill", default=None,
                     help="Path to SKILL.md (default: next to this script)")
+    ap.add_argument("--resume", action="store_true",
+                    help="Skip Stage 1 and reload triage scores from an existing "
+                         "%s (useful when Stage 1 finished but Stage 2 failed)" % CSV_NAME)
     args = ap.parse_args(argv)
 
     try:  # live progress even when stdout is piped (e.g. launchd logs)
@@ -434,7 +475,7 @@ def main(argv=None):
 
     client = make_client()  # fails clearly if ANTHROPIC_API_KEY is missing
     process_folder(client, folder, top_n=args.top, workers=args.workers,
-                   skill_path=args.skill, images=images)
+                   skill_path=args.skill, images=images, resume=args.resume)
     return 0
 
 
