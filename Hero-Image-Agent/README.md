@@ -32,6 +32,7 @@ This skill takes the first pass. Trent reviews 3–5 options, not 300.
 | `TASTE_REFERENCE_TEMPLATE.md` | Template for Trent to document 10 hero + 10 not-hero examples |
 | `WCM_STYLE_PROFILE.md` | Extracted visual taste and brand aesthetic — feeds into skill calibration |
 | `INSTALL.md` | Step-by-step setup for both manual (claude.ai) and automated (Make.com) modes |
+| `PIPELINE_README.md` | **Local** two-stage Python pipeline (`hero_select.py` + `watch_folder.py`) — run by hand or auto-run on new folders via launchd |
 
 ---
 

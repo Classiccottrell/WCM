@@ -1,7 +1,7 @@
 ---
 name: hero-image-selector
 version: 2.0
-author: West Coast Modern / Mica
+author: West Coast Modern
 description: >
   Select the best hero image(s) from a batch of real estate property photos for West Coast Modern.
   Use this skill whenever someone uploads multiple property photos and wants to identify the hero shot,

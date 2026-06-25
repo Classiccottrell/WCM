@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd agent: starts the WCM hero-selection watcher at login.
+
+  EDIT the four CHANGE_ME values below, then install:
+
+    cp com.westcoastmodern.heroselect.plist ~/Library/LaunchAgents/
+    launchctl load   ~/Library/LaunchAgents/com.westcoastmodern.heroselect.plist
+    launchctl start  com.westcoastmodern.heroselect      # run now without waiting for next login
+
+  Stop / uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.westcoastmodern.heroselect.plist
+
+  IMPORTANT: a login launchd agent does NOT read your ~/.zshrc, so an
+  `export ANTHROPIC_API_KEY=...` in your shell is invisible to it. The key MUST
+  be set in the <EnvironmentVariables> block below.
+
+  Find your absolute python3 path with:  which python3
+
+  ----------------------------------------------------------------------------
+  CRON ALTERNATIVE (if you'd rather poll than run a persistent watcher) — add
+  this one line via `crontab -e` (runs the engine on every subfolder of the
+  parent every 10 min; the engine skips folders that already have a report):
+
+  */10 * * * * ANTHROPIC_API_KEY=sk-ant-CHANGE_ME /usr/bin/find /CHANGE_ME/Parent -mindepth 1 -maxdepth 1 -type d -exec /usr/local/bin/python3 /CHANGE_ME/Hero-Image-Agent/hero_select.py {} \; >> /tmp/wcm-hero.log 2>&1
+  ----------------------------------------------------------------------------
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.westcoastmodern.heroselect</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/python3</string>           <!-- CHANGE_ME: `which python3` -->
+        <string>/CHANGE_ME/Hero-Image-Agent/watch_folder.py</string>  <!-- CHANGE_ME: absolute path to watch_folder.py -->
+        <string>/CHANGE_ME/Parent</string>                <!-- CHANGE_ME: parent dir to watch -->
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>ANTHROPIC_API_KEY</key>
+        <string>sk-ant-CHANGE_ME</string>                 <!-- CHANGE_ME: your API key -->
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/wcm-hero-watch.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/wcm-hero-watch.err.log</string>
+</dict>
+</plist>
