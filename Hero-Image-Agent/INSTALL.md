@@ -130,19 +130,133 @@ Claude outputs the Hero Report in the Cowork session. You can ask follow-up ques
 
 ---
 
-## MODE 3 — Automated (Make.com + Claude API)
-### Full pipeline. Requires API access and Make.com setup. ~2–3 hours to configure.
+## MODE 3 — Automated (Python CLI)
+### Runs entirely from Terminal. No uploads, no browser. ~15 minutes to set up.
 
-See the separate document: **`MAKE_AUTOMATION_SETUP.md`**
+**Best for:** Mica or Trent running hero selection hands-free from a local folder — point it at a shoot, walk away, come back to a finished report.
 
-This document covers the complete step-by-step Make.com scenario configuration, including the Dropbox trigger, image aggregation, Claude API payload, Google Drive output, and Slack notification.
+---
 
-### Prerequisites (check these before starting):
-- [ ] Anthropic API key (create at console.anthropic.com — Trent's account)
-- [ ] Make.com account (create at make.com — free tier covers ~10 properties/month)
-- [ ] Dropbox account with WCM folder structure in place
-- [ ] Slack workspace with `#photo-curation` channel created
-- [ ] Google Drive folder structure set up (see Folder Structure below)
+### Prerequisites
+
+- [ ] **Python 3.9 or later** — check with `python3 --version`
+- [ ] **Anthropic API key** — get one at [console.anthropic.com](https://console.anthropic.com) (Trent's account)
+- [ ] **This repository cloned locally** — `git clone https://github.com/Classiccottrell/WCM.git`
+
+---
+
+### Step 1: Open Terminal and navigate to the agent folder
+
+```bash
+cd /path/to/WCM/Hero-Image-Agent
+```
+
+---
+
+### Step 2: Create a virtual environment and install
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+This installs the `wcm` command and all dependencies (`anthropic`, `Pillow`, `watchdog`).
+
+**Verify it worked:**
+
+```bash
+wcm --help
+```
+
+You should see the two subcommands: `run` and `watch`.
+
+---
+
+### Step 3: Set your API key
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+> **Note:** This only lasts for the current Terminal session. To make it permanent, add the line above to your `~/.zshrc` (Mac default) or `~/.bashrc`, then run `source ~/.zshrc`.
+
+---
+
+### Step 4: Run on a property folder
+
+```bash
+wcm run /path/to/PropertyName
+```
+
+Replace `/path/to/PropertyName` with the actual folder containing the shoot photos (JPG, PNG, WEBP supported).
+
+**What happens:**
+1. Stage 1 — every image is scored 0–60 in parallel using a fast model. Takes ~30–90 seconds for a typical shoot.
+2. Stage 2 — the top 12 scoring images are sent to a strong model with the full hero rubric. Takes ~60–120 seconds.
+
+**Outputs written into the property folder:**
+- `triage_scores.csv` — every image with its score, Interior/Exterior flag, and a short note
+- `hero_report.md` — the full Hero Report (hero pick, vertical alt, shortlist, tour sequence, cuts, flags)
+
+---
+
+### Common options
+
+```bash
+# Review more candidates in Stage 2 and use more parallel workers
+wcm run /path/to/PropertyName --top 20 --workers 10
+
+# Stage 1 already ran but Stage 2 failed — pick up where you left off
+wcm run /path/to/PropertyName --resume
+
+# Use a custom skill file instead of the default SKILL.md
+wcm run /path/to/PropertyName --skill /path/to/custom-SKILL.md
+```
+
+---
+
+### Reactivating in a new Terminal session
+
+The virtual environment and API key don't persist across Terminal sessions. Each time you open a new window:
+
+```bash
+cd /path/to/WCM/Hero-Image-Agent
+source .venv/bin/activate
+export ANTHROPIC_API_KEY="sk-ant-..."
+wcm run /path/to/PropertyName
+```
+
+> **Tip:** Add both the `source` and `export` lines to `~/.zshrc` so they load automatically on every Terminal session. You will still need to `cd` to the right folder.
+
+---
+
+### Watch mode (automatic — advanced)
+
+`wcm watch` monitors a parent directory. Drop a new property folder inside and the pipeline starts automatically once the copy finishes (~30 second stability window).
+
+```bash
+wcm watch /path/to/Parent
+```
+
+```bash
+# Also process any existing folders that don't yet have a report
+wcm watch /path/to/Parent --scan-existing
+```
+
+See the main README for launchd auto-start instructions (runs the watcher at login without opening Terminal).
+
+---
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `command not found: wcm` | Run `source .venv/bin/activate` first |
+| `ERROR: ANTHROPIC_API_KEY is not set` | Run `export ANTHROPIC_API_KEY="sk-ant-..."` |
+| `No images found` | Check the folder path; images must be directly inside it (not in subfolders) |
+| Stage 2 timeout / error | Re-run with `--resume` to skip Stage 1 and retry Stage 2 only |
+| Scores feel wrong | Add more examples to `TASTE_REFERENCE_TEMPLATE.md` and re-run |
 
 ---
 
