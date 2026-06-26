@@ -87,6 +87,8 @@ Please read all images in that folder and run the hero selection.
 
 Claude Cowork reads images directly from that path. You can ask follow-up questions, request score breakdowns, or compare specific candidates before confirming.
 
+Mode 2 also writes a styled `hero_report.html` into the property folder (same styling as Mode 3) — open it in a browser and use Print → Save as PDF for a shareable PDF.
+
 ---
 
 ## Mode 3 — Automated Python Pipeline (`wcm` command)

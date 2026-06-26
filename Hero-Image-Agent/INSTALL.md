@@ -122,6 +122,8 @@ Claude Cowork will read the images directly from that path without you uploading
 ### Step 5: Review and confirm
 Claude outputs the Hero Report in the Cowork session. You can ask follow-up questions, request score breakdowns, or ask Claude to compare two specific candidates. When you're done, copy the report and save it to Google Drive.
 
+The agent also always writes a styled `hero_report.html` into the property folder (matching the Mode 3 design). Open it in any browser and use **Print → Save as PDF** to get a shareable PDF.
+
 ### Tips for Cowork Mode
 - If the folder has 200+ images, you can ask Claude to do a first pass on exteriors only: *"Start with just the exterior shots and give me the top 10 before we go further"*
 - You can ask Claude to display the shortlisted images side by side for comparison
@@ -297,7 +299,7 @@ the property folder (or `wcm watch` at the parent of many).
 
 ```
 /
-├── SKILL.md                      ← Core skill instructions (v2.0)
+├── SKILL.md                      ← Core skill instructions (v2.1)
 ├── AGENT.md                      ← Agent identity and capabilities
 ├── TASTE_REFERENCE_TEMPLATE.md   ← Trent fills this out (10 good + 10 not-hero)
 ├── WCM_STYLE_PROFILE.md          ← Brand aesthetic extraction

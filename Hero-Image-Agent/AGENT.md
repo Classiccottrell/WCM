@@ -91,6 +91,10 @@ Among hero candidates, does any image show the property hook?
 hero_report.md + hero_report.html — hero pick + shortlist of 5 with scores
 ```
 
+> The styled `hero_report.html` is produced in manual / Cowork (Mode 2) runs too —
+> the agent always writes it into the property folder so it can be opened in a
+> browser and saved as a PDF via Print → Save as PDF.
+
 ---
 
 ## Tone and Communication
@@ -160,3 +164,4 @@ The agent **must escalate to Trent** (via a flag in the report) when:
 |---|---|---|
 | 1.0 | May 19 2026 | Initial hero selection skill |
 | 2.0 | May 28 2026 | Expanded to full agent with automation mode, MLS sets, platform-specific outputs |
+| 2.1 | Jun 26 2026 | Mode 2 (Cowork) now always writes the styled hero_report.html artifact (print → PDF) |

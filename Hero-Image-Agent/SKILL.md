@@ -1,6 +1,6 @@
 ---
 name: hero-image-selector
-version: 2.0
+version: 2.1
 author: West Coast Modern
 description: >
   Select the best hero image(s) from a batch of real estate property photos for West Coast Modern.
@@ -123,7 +123,11 @@ Second-best thumbnail option. Should feel distinct from Hero 1 — different ang
 **Step 7 — Build shortlist**
 Top 5–8 for gallery/tour sequence use. These feed the MLS and Instagram carousel.
 
-**Step 8 — Output the report**
+**Step 8 — Output the report (in-chat)**
+Produce the ASCII report in the structure under "## Output Format" below.
+
+**Step 9 — Write the styled HTML artifact (always)**
+Write `hero_report.html` into the property folder using the template in "## Required Artifact — Styled HTML Report". Mandatory — never skip, even on a Rush run.
 
 ---
 
@@ -188,6 +192,194 @@ CUTS — Do Not Use for Hero or Gallery
 FLAGS / NOTES FOR TRENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Any edge cases, close calls, or questions that warrant Trent's eye]
+```
+
+---
+
+## Required Artifact — Styled HTML Report (always produce)
+
+After producing the in-chat report, you **MUST** write a file named `hero_report.html` into the property folder — the same folder the photos came from. If the photos were uploaded rather than read from a folder, write it into the session working directory. This makes the report show up in Cowork as a file the user can open. Never skip this, even on a Rush run.
+
+Fill the template below with the report content, then end your turn by telling the user:
+
+> Styled report written to `hero_report.html` — open it in your browser and use File → Print → Save as PDF for a shareable PDF.
+
+### Mapping the in-chat report into the template
+
+- **Masthead** — property name → `{{PROPERTY}}`, today's date → `{{DATE}}`, image count → `{{IMAGE_COUNT}}`.
+- **HERO / HERO VERTICAL / HERO 2** — each becomes a `<section class="section-block">` with the big `.score-display` (score `{{HERO_SCORE}}` etc.) and the 6-dimension `.breakdown` bars (one `.dim` per dimension; set each `.dim-fill` width to `score/10*100%` and the `.dim-val` to the 1–10 value). Put the filename in an `.image-ref`, the "Why / Notes" copy in `.body-text`, and the "Use for" line in `.use-for`.
+- **SHORTLIST** and **SUGGESTED TOUR SEQUENCE** — render as `.report-list` ordered lists (`<ol>`), one `<li>` per entry.
+- **CUTS** — render as a `.report-list` list.
+- **FLAGS / NOTES FOR TRENT** — render each as a `.flag-item` block.
+- **Triage** — there is no triage `<section>` in this template. If a full per-image triage isn't available in a manual run, that's expected — omit it entirely (it's optional for Mode 2).
+
+### Template (self-contained — copy, fill, write to `hero_report.html`)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hero Report — {{PROPERTY}}</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.508 0.118 165.612);
+  --primary-foreground: oklch(0.979 0.021 166.113);
+  --secondary: oklch(0.967 0.001 286.375);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0;
+  /* WCM additions */
+  --score-high: oklch(0.65 0.15 145);
+  --score-mid: var(--primary);
+  --score-low: var(--muted-foreground);
+  --serif: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --mono: 'SF Mono','Fira Code',monospace;
+}
+
+body{background:var(--background);color:var(--foreground);
+  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  font-size:15px;line-height:1.7}
+.masthead{background:var(--card);border-bottom:1px solid var(--border);padding:48px 64px 36px}
+.wordmark{font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--primary);margin-bottom:18px}
+.masthead h1{font-family:var(--serif);font-size:34px;font-weight:normal;
+  letter-spacing:-.01em;line-height:1.2;margin-bottom:10px}
+.masthead-meta{font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted-foreground)}
+.masthead-meta span{margin-right:24px}
+.report-body{max-width:860px;margin:0 auto;padding:48px 64px}
+.sep{border-top:1px solid var(--border);margin:28px 0}
+h2.section-head{font-size:10px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--primary);margin:36px 0 12px}
+.score-display{margin:8px 0 12px}
+.score-num{font-family:var(--serif);font-size:50px;font-weight:normal;line-height:1}
+.score-denom{font-family:var(--serif);font-size:20px;color:var(--muted-foreground)}
+.breakdown{display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0 20px;
+  padding:16px 20px;background:var(--card);border:1px solid var(--border)}
+.dim{display:flex;align-items:center;gap:8px;font-size:12px;min-width:170px}
+.dim-lbl{color:var(--muted-foreground);width:120px;flex-shrink:0}
+.dim-bar{flex:1;height:3px;background:var(--border);min-width:60px}
+.dim-fill{height:100%;background:var(--primary)}
+.dim-val{color:var(--foreground);width:14px;text-align:right}
+.image-ref{font-family:var(--mono);font-size:13px;color:var(--primary);
+  background:var(--card);display:inline-block;padding:4px 10px;
+  border:1px solid var(--border);margin:4px 0 0}
+.use-for{font-size:13px;color:var(--muted-foreground);margin:8px 0 16px}
+.use-for em{font-style:normal;color:var(--foreground)}
+.body-text{color:var(--foreground);margin:10px 0;max-width:680px}
+.report-list{margin:10px 0 10px 20px}
+.report-list li{margin:6px 0}
+.flag-item{margin:12px 0;padding:12px 16px;border-left:2px solid var(--primary);
+  background:color-mix(in oklch,var(--primary) 8%,transparent);
+  font-size:14px;max-width:680px}
+.report-footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--border);
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted-foreground);opacity:0.4}
+
+@page{margin:18mm}
+@media print{body{font-size:12px}.masthead{padding:32px 0 24px}.report-body{padding:24px 0}.section-block{break-inside:avoid}.breakdown{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="wordmark">West Coast Modern</div>
+  <h1>Hero Image Report</h1>
+  <div class="masthead-meta">
+    <span>{{PROPERTY}}</span>
+    <span>{{DATE}}</span>
+    <span>{{IMAGE_COUNT}} images reviewed</span>
+  </div>
+</header>
+<main class="report-body">
+
+  <section class="section-block">
+    <h2 class="section-head">Hero — Primary (Horizontal)</h2>
+    <div class="image-ref">{{HERO_IMAGE}}</div>
+    <div class="score-display"><span class="score-num">{{HERO_SCORE}}</span><span class="score-denom">/60</span></div>
+    <div class="breakdown">
+      <div class="dim"><span class="dim-lbl">Architecture</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_ARCH_PCT}}%"></span></span><span class="dim-val">{{HERO_ARCH}}</span></div>
+      <div class="dim"><span class="dim-lbl">Light</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_LIGHT_PCT}}%"></span></span><span class="dim-val">{{HERO_LIGHT}}</span></div>
+      <div class="dim"><span class="dim-lbl">Composition</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_COMP_PCT}}%"></span></span><span class="dim-val">{{HERO_COMP}}</span></div>
+      <div class="dim"><span class="dim-lbl">Resonance</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_RES_PCT}}%"></span></span><span class="dim-val">{{HERO_RES}}</span></div>
+      <div class="dim"><span class="dim-lbl">Brand fit</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_BRAND_PCT}}%"></span></span><span class="dim-val">{{HERO_BRAND}}</span></div>
+      <div class="dim"><span class="dim-lbl">Technical</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO_TECH_PCT}}%"></span></span><span class="dim-val">{{HERO_TECH}}</span></div>
+    </div>
+    <p class="body-text">{{HERO_WHY}}</p>
+    <p class="use-for">Use for: <em>{{HERO_USE_FOR}}</em></p>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="section-block">
+    <h2 class="section-head">Hero Vertical Alternative</h2>
+    <div class="image-ref">{{VERT_IMAGE}}</div>
+    <div class="score-display"><span class="score-num">{{VERT_SCORE}}</span><span class="score-denom">/60</span></div>
+    <div class="breakdown">
+      <div class="dim"><span class="dim-lbl">Architecture</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_ARCH_PCT}}%"></span></span><span class="dim-val">{{VERT_ARCH}}</span></div>
+      <div class="dim"><span class="dim-lbl">Light</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_LIGHT_PCT}}%"></span></span><span class="dim-val">{{VERT_LIGHT}}</span></div>
+      <div class="dim"><span class="dim-lbl">Composition</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_COMP_PCT}}%"></span></span><span class="dim-val">{{VERT_COMP}}</span></div>
+      <div class="dim"><span class="dim-lbl">Resonance</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_RES_PCT}}%"></span></span><span class="dim-val">{{VERT_RES}}</span></div>
+      <div class="dim"><span class="dim-lbl">Brand fit</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_BRAND_PCT}}%"></span></span><span class="dim-val">{{VERT_BRAND}}</span></div>
+      <div class="dim"><span class="dim-lbl">Technical</span><span class="dim-bar"><span class="dim-fill" style="width:{{VERT_TECH_PCT}}%"></span></span><span class="dim-val">{{VERT_TECH}}</span></div>
+    </div>
+    <p class="body-text">{{VERT_NOTES}}</p>
+    <p class="use-for">Use for: <em>{{VERT_USE_FOR}}</em></p>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="section-block">
+    <h2 class="section-head">Hero 2 — Backup / Second Lead</h2>
+    <div class="image-ref">{{HERO2_IMAGE}}</div>
+    <div class="score-display"><span class="score-num">{{HERO2_SCORE}}</span><span class="score-denom">/60</span></div>
+    <div class="breakdown">
+      <div class="dim"><span class="dim-lbl">Architecture</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_ARCH_PCT}}%"></span></span><span class="dim-val">{{HERO2_ARCH}}</span></div>
+      <div class="dim"><span class="dim-lbl">Light</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_LIGHT_PCT}}%"></span></span><span class="dim-val">{{HERO2_LIGHT}}</span></div>
+      <div class="dim"><span class="dim-lbl">Composition</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_COMP_PCT}}%"></span></span><span class="dim-val">{{HERO2_COMP}}</span></div>
+      <div class="dim"><span class="dim-lbl">Resonance</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_RES_PCT}}%"></span></span><span class="dim-val">{{HERO2_RES}}</span></div>
+      <div class="dim"><span class="dim-lbl">Brand fit</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_BRAND_PCT}}%"></span></span><span class="dim-val">{{HERO2_BRAND}}</span></div>
+      <div class="dim"><span class="dim-lbl">Technical</span><span class="dim-bar"><span class="dim-fill" style="width:{{HERO2_TECH_PCT}}%"></span></span><span class="dim-val">{{HERO2_TECH}}</span></div>
+    </div>
+    <p class="body-text">{{HERO2_NOTES}}</p>
+    <p class="use-for">Use for: <em>{{HERO2_USE_FOR}}</em></p>
+  </section>
+
+  <div class="sep"></div>
+
+  <h2 class="section-head">Shortlist — Gallery &amp; Tour Sequence</h2>
+  <ol class="report-list">
+    {{SHORTLIST_ITEMS}}
+  </ol>
+
+  <h2 class="section-head">Suggested Tour Sequence</h2>
+  <ol class="report-list">
+    {{TOUR_ITEMS}}
+  </ol>
+
+  <h2 class="section-head">Cuts — Do Not Use for Hero or Gallery</h2>
+  <ul class="report-list">
+    {{CUTS_ITEMS}}
+  </ul>
+
+  <h2 class="section-head">Flags / Notes for Trent</h2>
+  {{FLAG_ITEMS}}
+
+  <footer class="report-footer">West Coast Modern — Architecture, not real estate.</footer>
+</main>
+</body>
+</html>
 ```
 
 ---
