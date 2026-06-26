@@ -283,6 +283,7 @@ def main(argv=None):
             "Outputs written into the property folder:\n"
             "  triage_scores.csv  — every image scored\n"
             "  hero_report.md     — the Hero Report\n"
+            "  hero_report.html   — styled HTML version (open in browser)\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

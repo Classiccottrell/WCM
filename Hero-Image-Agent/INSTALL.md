@@ -312,6 +312,100 @@ the property folder (or `wcm watch` at the parent of many).
 
 ---
 
+---
+
+## MODE 3B — Local CLI Pipeline (`.env` file variant)
+### Same as Mode 3, but stores the API key in a project `.env` file instead of exporting it each session.
+
+This variant is useful when you don't want to add the API key to `~/.zshrc` permanently, or when running from an IDE/script that sources `.env` automatically.
+
+---
+
+### One-time setup
+
+**Step 1 — Get an Anthropic API key**
+
+1. Go to [console.anthropic.com](https://console.anthropic.com) → API Keys → Create key
+2. Copy the key — you'll need it in Step 3
+
+**Step 2 — Create the virtual environment**
+
+From inside the `WCM/Hero-Image-Agent/` directory:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e .
+```
+
+**Step 3 — Create the `.env` file**
+
+Inside `WCM/Hero-Image-Agent/`, create a file called `.env`:
+
+```
+ANTHROPIC_API_KEY=sk-ant-api03-...your-key-here...
+```
+
+This file is already in `.gitignore` — the key will never be committed.
+
+---
+
+### Running the pipeline
+
+From `WCM/Hero-Image-Agent/`:
+
+```bash
+set -a && source .env && set +a && \
+.venv/bin/python3 hero_select.py "/path/to/PropertyName/photos/raw"
+```
+
+Or using the `wcm` command after sourcing the env:
+
+```bash
+set -a && source .env && set +a && wcm run "/path/to/PropertyName/photos/raw"
+```
+
+Replace the path with the actual folder containing the shoot photos (quotes required if it has spaces).
+
+---
+
+### Outputs written into the property folder
+
+| File | What it contains |
+|---|---|
+| `triage_scores.csv` | Stage 1 score for every image |
+| `hero_report.md` | Full Stage 2 hero report with FLAGS FOR TRENT |
+| `hero_report.html` | Styled HTML version of the report — open in any browser |
+
+Open `hero_report.html` in Safari or Chrome for the formatted WCM-branded view.
+
+---
+
+### Optional flags
+
+```bash
+# Increase candidates passed to Stage 2 (default: 12)
+... hero_select.py "/path/to/raw" --top 15
+
+# Increase parallel workers for faster Stage 1 (default: 5)
+... hero_select.py "/path/to/raw" --workers 8
+
+# Resume from an existing triage_scores.csv (Stage 1 already done)
+... hero_select.py "/path/to/raw" --resume
+```
+
+---
+
+### Troubleshooting
+
+| Error | Fix |
+|---|---|
+| `no such file or directory: .venv/bin/activate` | Run Step 2 of one-time setup |
+| `ANTHROPIC_API_KEY is not set` | Run Step 3 of one-time setup |
+| `AuthenticationError` / 401 | Key is invalid or revoked — generate a new one at console.anthropic.com |
+| Score 0/60 on all images | API key issue — same as above |
+
+---
+
 ## Support
 
 If Claude's selections feel off, the fastest fix is more taste reference examples from Trent.

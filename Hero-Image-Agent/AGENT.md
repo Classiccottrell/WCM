@@ -74,6 +74,7 @@ Among hero candidates, does any image show the property hook?
 ```
 /output/
 ├── hero_report.md              ← Full scored report with reasoning
+├── hero_report.html            ← Styled HTML version with photos and triage table (open in browser)
 ├── sets/
 │   ├── hero_horizontal.jpg     ← Single hero file (renamed)
 │   ├── hero_vertical.jpg       ← Vertical hero / alternative
@@ -87,7 +88,7 @@ Among hero candidates, does any image show the property hook?
 
 ### For a quick hero-only run:
 ```
-hero_report.md only — hero pick + shortlist of 5 with scores
+hero_report.md + hero_report.html — hero pick + shortlist of 5 with scores
 ```
 
 ---
@@ -108,7 +109,7 @@ hero_report.md only — hero pick + shortlist of 5 with scores
 | System | Purpose | Status |
 |---|---|---|
 | Claude API | Vision scoring and report generation | Requires Anthropic API key |
-| Local property folder | Source photos and destination for `hero_report.md` | Standard `/WCM/[PropertyName]/photography/` layout |
+| Local property folder | Source photos and destination for `hero_report.md` + `hero_report.html` | Standard `/WCM/[PropertyName]/photography/` layout |
 | `wcm` CLI | Local orchestration (`run` / `watch` / `doctor`) | `pip install -e .` in `Hero-Image-Agent/` |
 | `launchd` / `cron` | Auto-run `wcm watch` on new folders | Optional automation layer (macOS) |
 
@@ -122,7 +123,7 @@ When running automated via the local watcher, the agent runs on this trigger:
 Trigger: New folder appears under the watched parent, e.g. /WCM/[PropertyName]/photography/raw/
   → Watcher waits ~30s for the copy to finish (folder size stabilises)
   → Runs the full two-stage hero selection pass
-  → Writes triage_scores.csv + hero_report.md into the property folder
+  → Writes triage_scores.csv + hero_report.md + hero_report.html into the property folder
   → Mica reviews the report, confirms the hero, sends to Trent for final sign-off
 ```
 

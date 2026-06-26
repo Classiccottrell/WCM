@@ -148,6 +148,7 @@ wcm run /path/to/PropertyName --skill /path/to/custom-SKILL.md
 **Outputs written into the property folder:**
 - `triage_scores.csv` — every image with `file, score, isExterior, note`, sorted highest to lowest
 - `hero_report.md` — the full Hero Report (hero horizontal, vertical alt, hero 2, shortlist, tour sequence, cuts, flags)
+- `hero_report.html` — styled WCM-branded HTML version with photos and triage table; open in any browser
 
 When the run finishes, a summary prints the top picks, where the report was saved, and how long it took.
 

@@ -71,7 +71,7 @@ Photos land in a property folder
   → wcm run /path/to/PropertyName
   → Stage 1 scores every image (fast model, in parallel)
   → Stage 2 sends the top picks to a stronger model
-  → triage_scores.csv + hero_report.md written into the folder
+  → triage_scores.csv + hero_report.md + hero_report.html written into the folder
   → Trent reviews 3 options instead of 300
 ```
 
@@ -115,7 +115,7 @@ Even 3–4 examples help. 10 examples produces output that's very close to Trent
 | Automated interface | `wcm` CLI — local Python (`hero_select.py` + `watch_folder.py`) |
 | Auto-run on new folders | macOS `launchd` (or `cron`) running `wcm watch` |
 | Photo storage | Local folder (e.g. a synced Dropbox/Drive folder) |
-| Report storage | The property folder itself (`hero_report.md`) |
+| Report storage | The property folder itself (`hero_report.md` + `hero_report.html`) |
 | Interface (manual) | claude.ai / Claude Cowork |
 
 ---

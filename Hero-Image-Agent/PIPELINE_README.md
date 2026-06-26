@@ -127,3 +127,5 @@ wcm watch /path/to/Parent --top 12 --workers 5 --scan-existing
 - `triage_scores.csv` — `file, score, isExterior, note` for every image, sorted desc
 - `hero_report.md` — the full Stage-2 Hero Report (hero horizontal, vertical alt,
   hero 2, shortlist, suggested tour sequence, cuts, flags for Trent)
+- `hero_report.html` — styled WCM-branded HTML version of the report with the full
+  triage scores table embedded; open in any browser for the formatted view
