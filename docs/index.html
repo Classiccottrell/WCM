@@ -4,205 +4,271 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>West Coast Modern — Hero-Image-Agent</title>
-<meta name="description" content="An AI assistant that turns a full property photo shoot into a curated, client-ready hero image package in minutes." />
+<meta name="description" content="An AI assistant that turns a full property shoot into a curated, client-ready hero image package in minutes." />
 <style>
-  :root {
-    --ink: #1c1a17;
-    --ink-soft: #4a4640;
-    --muted: #7c766c;
-    --line: #e4dfd6;
-    --paper: #fbfaf7;
-    --paper-2: #f3f0e9;
-    --card: #ffffff;
-    --accent: #9a6b3f;       /* warm timber */
-    --accent-deep: #7a5230;
-    --sky: #5c7a86;          /* calm slate-blue */
-    --plain-bg: #eef3f2;
-    --plain-line: #cfe0db;
-    --plain-ink: #2c4a44;
-    --radius: 14px;
-    --maxw: 980px;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--paper);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-  }
-  h1, h2, h3, h4 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
-  a { color: var(--accent-deep); }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  /* ---------- Top nav ---------- */
-  header.nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(251,250,247,0.88);
-    backdrop-filter: saturate(180%) blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  .nav-inner {
-    max-width: var(--maxw); margin: 0 auto; padding: 14px 24px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  }
-  .brand { font-family: Georgia, serif; font-size: 15px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); }
-  .brand small { display: block; font-size: 10px; letter-spacing: 0.22em; color: var(--muted); margin-top: 2px; }
-  .nav-links { display: flex; gap: 22px; font-size: 13px; }
-  .nav-links a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.02em; }
-  .nav-links a:hover { color: var(--accent-deep); }
-  @media (max-width: 720px) { .nav-links { display: none; } }
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.508 0.118 165.612);
+  --primary-foreground: oklch(0.979 0.021 166.113);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.596 0.145 163.225);
+  --sidebar-primary-foreground: oklch(0.979 0.021 166.113);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  /* WCM additions */
+  --score-high: oklch(0.65 0.15 145);
+  --score-mid: var(--primary);
+  --score-low: var(--muted-foreground);
+  --serif: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --mono: 'SF Mono','Fira Code',monospace;
+}
 
-  /* ---------- Hero ---------- */
-  .hero {
-    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
-    border-bottom: 1px solid var(--line);
-    padding: 84px 24px 72px;
-  }
-  .hero-inner { max-width: var(--maxw); margin: 0 auto; }
-  .eyebrow { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
-  .hero h1 { font-size: clamp(34px, 6vw, 56px); margin: 0 0 22px; max-width: 16ch; }
-  .lede { font-size: clamp(18px, 2.4vw, 22px); color: var(--ink-soft); max-width: 60ch; margin: 0 0 30px; }
-  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
-  .btn {
-    display: inline-block; padding: 13px 24px; border-radius: 999px; text-decoration: none;
-    font-size: 14px; font-weight: 600; letter-spacing: 0.02em; transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(154,107,63,0.28); }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(154,107,63,0.34); }
-  .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent-deep); }
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.432 0.095 166.913);
+  --primary-foreground: oklch(0.979 0.021 166.113);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.696 0.17 162.48);
+  --sidebar-primary-foreground: oklch(0.262 0.051 172.552);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  /* WCM additions */
+  --score-high: oklch(0.65 0.15 145);
+  --score-mid: var(--primary);
+  --score-low: var(--muted-foreground);
+}
 
-  /* ---------- Layout sections ---------- */
-  main { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
-  section { padding: 64px 0; border-bottom: 1px solid var(--line); }
-  section:last-of-type { border-bottom: none; }
-  .section-tag { font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
-  section > h2 { font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 8px; }
-  .section-sub { color: var(--muted); font-size: 16px; margin: 0 0 28px; max-width: 60ch; }
+html{scroll-behavior:smooth}
+body{background:var(--background);color:var(--foreground);
+  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  font-size:15px;line-height:1.7}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
 
-  /* ---------- Plain-English callout ---------- */
-  .plain {
-    background: var(--plain-bg);
-    border: 1px solid var(--plain-line);
-    border-left: 4px solid var(--sky);
-    border-radius: 10px;
-    padding: 18px 22px;
-    margin: 0 0 28px;
-    color: var(--plain-ink);
-  }
-  .plain .plain-label {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--sky); margin: 0 0 6px;
-  }
-  .plain p { margin: 0; font-size: 15.5px; }
-  .plain p + p { margin-top: 10px; }
+/* ---------- Theme toggle (matches hero_report.html) ---------- */
+.theme-toggle{position:fixed;top:20px;right:24px;z-index:100;
+  background:var(--card);border:1px solid var(--border);color:var(--muted-foreground);
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 14px;cursor:pointer;transition:color .15s,border-color .15s}
+.theme-toggle:hover{color:var(--foreground);border-color:var(--ring)}
 
-  /* ---------- Cards ---------- */
-  .grid { display: grid; gap: 18px; }
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 760px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 24px; box-shadow: 0 1px 2px rgba(28,26,23,0.03);
-  }
-  .card h3 { margin: 0 0 8px; font-size: 19px; }
-  .card p { margin: 0; color: var(--ink-soft); font-size: 15px; }
-  .card .pill { display: inline-block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep); background: var(--paper-2); border-radius: 999px; padding: 3px 10px; margin-bottom: 12px; }
-  .card .num { font-family: Georgia, serif; font-size: 13px; color: var(--accent); letter-spacing: 0.1em; }
+/* ---------- In-page nav ---------- */
+.topnav{position:sticky;top:0;z-index:50;background:var(--card);
+  border-bottom:1px solid var(--border)}
+.topnav-inner{max-width:860px;margin:0 auto;padding:12px 64px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topnav .nm{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--primary)}
+.topnav nav{display:flex;gap:22px}
+.topnav nav a{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)}
+.topnav nav a:hover{color:var(--foreground);text-decoration:none}
+@media (max-width:720px){.topnav nav{display:none}.topnav-inner{padding:12px 24px}}
 
-  /* ---------- Steps / value ---------- */
-  .value-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; text-align: center; }
-  @media (max-width: 760px) { .value-row { grid-template-columns: 1fr; } }
-  .value-row .big { font-family: Georgia, serif; font-size: 40px; color: var(--accent); line-height: 1; margin: 0 0 6px; }
-  .value-row small { color: var(--muted); font-size: 14px; }
+/* ---------- Masthead ---------- */
+.masthead{background:var(--card);border-bottom:1px solid var(--border);padding:64px 64px 48px}
+.masthead-inner{max-width:860px;margin:0 auto}
+.wordmark{font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--primary);margin-bottom:18px}
+.masthead h1{font-family:var(--serif);font-size:44px;font-weight:normal;
+  letter-spacing:-.01em;line-height:1.15;margin-bottom:18px;max-width:18ch}
+.masthead .lede{font-size:18px;color:var(--muted-foreground);max-width:62ch;margin-bottom:14px}
+.masthead-meta{font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted-foreground);margin-bottom:28px}
+.masthead-meta span{margin-right:24px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{display:inline-block;padding:11px 22px;font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);
+  cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.btn-primary:hover{text-decoration:none;opacity:.9}
+.btn-ghost{background:var(--card);color:var(--foreground)}
+.btn-ghost:hover{text-decoration:none;border-color:var(--ring)}
 
-  /* ---------- Tables ---------- */
-  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
-  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 520px; }
-  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { background: var(--paper-2); font-family: -apple-system, sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
-  tr:last-child td { border-bottom: none; }
-  td code { font-size: 13px; }
+/* ---------- Layout ---------- */
+main{max-width:860px;margin:0 auto;padding:0 64px}
+@media (max-width:720px){main{padding:0 24px}.masthead{padding:48px 24px 36px}.masthead h1{font-size:34px}}
+section{padding:48px 0;border-top:1px solid var(--border)}
+section:first-of-type{border-top:none}
+.section-head{font-size:10px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--primary);margin-bottom:6px}
+section h2{font-family:var(--serif);font-size:28px;font-weight:normal;
+  letter-spacing:-.01em;line-height:1.2;margin-bottom:10px}
+section h3{font-family:var(--serif);font-weight:normal}
+.section-sub{color:var(--muted-foreground);max-width:62ch;margin-bottom:26px}
+.body-text{margin:10px 0;max-width:680px}
 
-  /* ---------- Code blocks ---------- */
-  pre {
-    background: #20201d; color: #ece7dd; border-radius: 10px; padding: 18px 20px;
-    overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 0 0 16px;
-    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
-  }
-  pre .c { color: #8a8577; } /* comment */
-  pre .k { color: #d9a86c; } /* keyword/command */
-  code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; background: var(--paper-2); padding: 2px 6px; border-radius: 5px; font-size: 0.88em; }
-  pre code { background: none; padding: 0; }
+/* ---------- Plain-English callout (flag-item pattern) ---------- */
+.plain{margin:0 0 26px;padding:16px 20px;border-left:2px solid var(--primary);
+  background:color-mix(in oklch,var(--primary) 8%,transparent);max-width:760px}
+.plain .plain-label{display:block;font-size:10px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.plain p{margin:0;font-size:14.5px;color:var(--foreground)}
+.plain p+p{margin-top:10px}
 
-  .mode-block { margin: 0 0 14px; }
-  .mode-block h3 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .mode-block h3 .tag { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--sky); padding: 3px 9px; border-radius: 999px; }
-  .setup-time { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--muted); font-weight: 400; }
+/* ---------- Cards ---------- */
+.grid{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);margin:0 0 6px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr}}
+.card{background:var(--card);padding:22px}
+.card .num{font-family:var(--serif);font-size:13px;color:var(--primary);letter-spacing:.1em;display:block;margin-bottom:8px}
+.card h3{font-size:18px;margin-bottom:8px}
+.card p{color:var(--muted-foreground);font-size:14px;margin:0}
+.card ul{margin:0;padding-left:18px}
+.card ul li{margin:6px 0;color:var(--muted-foreground);font-size:14px}
+.card ul li strong{color:var(--foreground)}
 
-  details { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 14px; background: #fff; overflow: hidden; }
-  details summary { cursor: pointer; padding: 18px 22px; font-family: Georgia, serif; font-size: 18px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-  details summary::-webkit-details-marker { display: none; }
-  details summary::after { content: "+"; font-family: -apple-system, sans-serif; font-size: 22px; color: var(--accent); font-weight: 300; }
-  details[open] summary::after { content: "–"; }
-  details summary:hover { color: var(--accent-deep); }
-  .details-body { padding: 0 22px 22px; border-top: 1px solid var(--line); }
-  .details-body h4 { margin: 18px 0 6px; font-size: 15px; }
+/* ---------- Value stats ---------- */
+.value-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);text-align:center}
+@media (max-width:720px){.value-row{grid-template-columns:1fr}}
+.value-row > div{background:var(--card);padding:26px 18px}
+.value-row .big{font-family:var(--serif);font-size:40px;color:var(--primary);line-height:1;margin-bottom:6px}
+.value-row small{color:var(--muted-foreground);font-size:13px;letter-spacing:.02em}
 
-  ul.clean { padding-left: 20px; margin: 0 0 16px; }
-  ul.clean li { margin-bottom: 8px; color: var(--ink-soft); }
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto;border:1px solid var(--border)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted-foreground);background:var(--card)}
+tbody tr:hover td{background:var(--muted)}
+tr:last-child td{border-bottom:none}
+td .sub{color:var(--muted-foreground);font-size:12px}
 
-  .flow { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13px; background: var(--paper-2); border: 1px dashed var(--line); border-radius: 10px; padding: 18px 20px; color: var(--ink-soft); white-space: pre-wrap; line-height: 1.8; }
+/* ---------- Code blocks ---------- */
+pre{background:oklch(0.205 0 0);color:oklch(0.97 0 0);padding:16px 18px;
+  overflow-x:auto;font-size:13px;line-height:1.6;margin:0 0 14px;
+  font-family:var(--mono);border:1px solid var(--border)}
+pre .c{color:oklch(0.62 0 0)}
+pre .k{color:oklch(0.74 0.1 165)}
+code{font-family:var(--mono);background:var(--muted);padding:2px 6px;font-size:.88em;color:var(--foreground)}
+pre code{background:none;padding:0;color:inherit}
 
-  footer { background: var(--ink); color: #d8d2c7; padding: 48px 24px; text-align: center; }
-  footer .f-inner { max-width: var(--maxw); margin: 0 auto; }
-  footer .tagline { font-family: Georgia, serif; font-size: 20px; color: #fff; margin: 0 0 8px; }
-  footer small { color: #9a948a; font-size: 13px; }
+/* ---------- Mode disclosures ---------- */
+details{border:1px solid var(--border);margin-bottom:12px;background:var(--card)}
+details summary{cursor:pointer;padding:16px 20px;font-family:var(--serif);font-size:18px;
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font-family:-apple-system,sans-serif;font-size:20px;color:var(--primary)}
+details[open] summary::after{content:"\2013"}
+details summary:hover{color:var(--primary)}
+.details-body{padding:0 20px 20px;border-top:1px solid var(--border)}
+.details-body h4{font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground);margin:20px 0 8px}
+.details-body p{color:var(--muted-foreground);margin:0 0 12px}
+.details-body p strong{color:var(--foreground)}
 
-  .anchor { scroll-margin-top: 80px; }
+ul.clean{padding-left:18px;margin:0 0 14px}
+ul.clean li{margin-bottom:7px;color:var(--muted-foreground)}
+ul.clean li strong{color:var(--foreground)}
+
+.flow{font-family:var(--mono);font-size:12.5px;background:var(--card);
+  border:1px solid var(--border);padding:18px 20px;color:var(--muted-foreground);
+  white-space:pre-wrap;line-height:1.9}
+.flow strong{color:var(--primary)}
+
+/* ---------- Footer ---------- */
+.report-footer{max-width:860px;margin:0 auto;margin-top:40px;padding:24px 64px 60px;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted-foreground);opacity:.5;border-top:1px solid var(--border)}
+@media (max-width:720px){.report-footer{padding:24px 24px 48px}}
+
+.anchor{scroll-margin-top:64px}
 </style>
 </head>
 <body>
 
-<header class="nav">
-  <div class="nav-inner">
-    <div class="brand">West Coast Modern<small>Hero-Image-Agent</small></div>
-    <nav class="nav-links">
+<button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">Dark</button>
+
+<div class="topnav">
+  <div class="topnav-inner">
+    <div class="nm">West Coast Modern</div>
+    <nav>
       <a href="#overview">Overview</a>
       <a href="#how">How it works</a>
-      <a href="#options">Delivery options</a>
+      <a href="#options">Options</a>
       <a href="#install">Setup</a>
-      <a href="#team">The team</a>
+      <a href="#team">Team</a>
     </nav>
   </div>
-</header>
+</div>
 
-<!-- ===================== HERO ===================== -->
-<div class="hero">
-  <div class="hero-inner">
-    <p class="eyebrow">AI-Assisted Photo Selection</p>
+<!-- ===================== MASTHEAD ===================== -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="wordmark">West Coast Modern · Hero-Image-Agent</div>
     <h1>Turn 300 photos into 3 great choices.</h1>
     <p class="lede">
-      The Hero-Image-Agent is an AI assistant that reviews an entire property photo shoot
-      and hands back a short, ranked list of the best images — ready for the website, MLS,
-      email, and Instagram. What used to take hours of manual sorting now takes minutes.
+      An AI assistant that reviews an entire property photo shoot and hands back a short,
+      ranked list of the best images — ready for the website, MLS, email and Instagram.
+      What used to take hours of manual sorting now takes minutes.
     </p>
-    <div class="hero-cta">
+    <div class="masthead-meta">
+      <span>AI-assisted photo selection</span>
+      <span>Three ways to run it</span>
+      <span>0-minute start</span>
+    </div>
+    <div class="cta-row">
       <a class="btn btn-primary" href="#how">See how it works</a>
       <a class="btn btn-ghost" href="#install">Setup instructions</a>
     </div>
   </div>
-</div>
+</header>
 
 <main>
 
   <!-- ===================== PLAIN-ENGLISH SUMMARY ===================== -->
   <section id="overview" class="anchor">
-    <p class="section-tag">The 30-Second Version</p>
+    <div class="section-head">The 30-Second Version</div>
     <h2>What this is, in plain English</h2>
     <div class="plain">
       <span class="plain-label">★ In simple terms</span>
@@ -226,15 +292,15 @@
 
     <div class="value-row">
       <div>
-        <p class="big">300→3</p>
+        <div class="big">300→3</div>
         <small>Photos reviewed manually, before vs. after</small>
       </div>
       <div>
-        <p class="big">~2 min</p>
+        <div class="big">~2 min</div>
         <small>To produce a hero report for a typical shoot</small>
       </div>
       <div>
-        <p class="big">0 setup</p>
+        <div class="big">0 setup</div>
         <small>To start, using the browser-based option</small>
       </div>
     </div>
@@ -242,7 +308,7 @@
 
   <!-- ===================== WHAT YOU GET ===================== -->
   <section id="how" class="anchor">
-    <p class="section-tag">What It Produces</p>
+    <div class="section-head">What It Produces</div>
     <h2>How it works &amp; what you get back</h2>
     <p class="section-sub">Three simple stages — triage, recommend, deliver — ending in a polished report a non-technical person can read at a glance.</p>
 
@@ -273,11 +339,11 @@
       </div>
     </div>
 
-    <h3 style="margin:36px 0 12px; font-size:20px;">Every report includes</h3>
+    <h3 style="font-size:20px;margin:32px 0 14px">Every report includes</h3>
     <div class="grid grid-2">
       <div class="card">
-        <h3 style="font-size:17px;">The selects</h3>
-        <ul class="clean" style="margin-bottom:0;">
+        <h3 style="font-size:16px">The selects</h3>
+        <ul>
           <li><strong>Hero (horizontal)</strong> — the lead image for website, email header and MLS</li>
           <li><strong>Hero vertical</strong> — for Instagram stories and email grids</li>
           <li><strong>Hero 2</strong> — a backup / second-campaign option</li>
@@ -285,8 +351,8 @@
         </ul>
       </div>
       <div class="card">
-        <h3 style="font-size:17px;">The guidance</h3>
-        <ul class="clean" style="margin-bottom:0;">
+        <h3 style="font-size:16px">The guidance</h3>
+        <ul>
           <li><strong>MLS set</strong> — up to 40 images, ordered and ready</li>
           <li><strong>Cuts list</strong> — what not to use, and the reason</li>
           <li><strong>Flags for Trent</strong> — close calls that genuinely need a human eye</li>
@@ -298,7 +364,7 @@
 
   <!-- ===================== DELIVERY OPTIONS ===================== -->
   <section id="options" class="anchor">
-    <p class="section-tag">Three Ways To Use It</p>
+    <div class="section-head">Three Ways To Use It</div>
     <h2>Delivery options</h2>
     <p class="section-sub">Start with the easy browser option. Move to the automatic one once the team is comfortable.</p>
 
@@ -319,17 +385,17 @@
         </thead>
         <tbody>
           <tr>
-            <td><strong>Manual — claude.ai</strong><br><span style="color:var(--muted);font-size:13px;">In a web browser</span></td>
+            <td><strong>Manual — claude.ai</strong><br><span class="sub">In a web browser</span></td>
             <td>Quick, ad-hoc selections from any device. Photos already in Drive or Dropbox.</td>
             <td>0 min</td>
           </tr>
           <tr>
-            <td><strong>Manual — Claude Cowork</strong><br><span style="color:var(--muted);font-size:13px;">Desktop app</span></td>
+            <td><strong>Manual — Claude Cowork</strong><br><span class="sub">Desktop app</span></td>
             <td>Large local shoots reviewed straight from a Mac — no uploading needed.</td>
             <td>~5 min</td>
           </tr>
           <tr>
-            <td><strong>Automated — <code>wcm</code> pipeline</strong><br><span style="color:var(--muted);font-size:13px;">Runs by itself</span></td>
+            <td><strong>Automated — <code>wcm</code> pipeline</strong><br><span class="sub">Runs by itself</span></td>
             <td>Hands-free, recurring shoots. Drop photos in a folder, get a report back.</td>
             <td>~15 min</td>
           </tr>
@@ -340,7 +406,7 @@
 
   <!-- ===================== INSTALL / SETUP ===================== -->
   <section id="install" class="anchor">
-    <p class="section-tag">Getting Started</p>
+    <div class="section-head">Getting Started</div>
     <h2>Setup instructions</h2>
     <p class="section-sub">Click any option to expand the full step-by-step. The technical steps each come with a plain-English note so anyone can follow along.</p>
 
@@ -348,16 +414,16 @@
     <details open>
       <summary>Option 1 — Browser (claude.ai) · 0 min setup</summary>
       <div class="details-body">
-        <div class="plain" style="margin-top:18px;">
+        <div class="plain" style="margin-top:18px">
           <span class="plain-label">★ In simple terms</span>
           <p>The no-setup option. Open a website, paste in the agent's instructions, drag in your photos, and ask it to run. Best for getting a result in the next five minutes.</p>
         </div>
 
         <h4>Step 1 — Open Claude</h4>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">Go to <a href="https://claude.ai">claude.ai</a> (the Pro plan is recommended for larger batches of photos).</p>
+        <p>Go to <a href="https://claude.ai">claude.ai</a> (the Pro plan is recommended for larger batches of photos).</p>
 
         <h4>Step 2 — Load the agent's instructions</h4>
-        <p style="color:var(--ink-soft);margin:0 0 10px;">Paste the full contents of <code>SKILL.md</code> into a new conversation, like this:</p>
+        <p>Paste the full contents of <code>SKILL.md</code> into a new conversation, like this:</p>
         <pre><code>I'm going to run a hero image selection session for West Coast Modern.
 Here are your instructions:
 
@@ -366,7 +432,7 @@ Here are your instructions:
 Ready to receive photos.</code></pre>
 
         <h4>Step 3 — (Optional) Add Trent's taste reference</h4>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">If Trent has filled in <code>TASTE_REFERENCE_TEMPLATE.md</code>, paste it next for results that more closely match his eye.</p>
+        <p>If Trent has filled in <code>TASTE_REFERENCE_TEMPLATE.md</code>, paste it next for results that more closely match his eye.</p>
 
         <h4>Step 4 — Upload photos and run</h4>
         <pre><code>Property: [House Name]
@@ -378,7 +444,7 @@ Target: [MLS | Instagram | Email | Feature Story | All]
 Run the hero selection.</code></pre>
 
         <h4>Step 5 — Review and save</h4>
-        <p style="color:var(--ink-soft);margin:0;">Claude returns the Hero Report. Review it, confirm the pick, and save it to the property folder. <strong>Tip:</strong> upload 20–30 photos per batch; for 200+, pull the top 40–50 exteriors first.</p>
+        <p>Claude returns the Hero Report. Review it, confirm the pick, and save it to the property folder. <strong>Tip:</strong> upload 20–30 photos per batch; for 200+, pull the top 40–50 exteriors first.</p>
       </div>
     </details>
 
@@ -386,19 +452,19 @@ Run the hero selection.</code></pre>
     <details>
       <summary>Option 2 — Desktop (Claude Cowork) · ~5 min setup</summary>
       <div class="details-body">
-        <div class="plain" style="margin-top:18px;">
+        <div class="plain" style="margin-top:18px">
           <span class="plain-label">★ In simple terms</span>
           <p>Same idea as Option 1, but using the Claude <em>desktop app</em>, which can read photos straight from a folder on your Mac. Nothing to upload — you just point it at the folder. Ideal for big shoots that already live on the computer.</p>
         </div>
 
         <h4>Step 1 — Open Claude Cowork</h4>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">Open the Cowork desktop app and sign in with your claude.ai account (Pro plan).</p>
+        <p>Open the Cowork desktop app and sign in with your claude.ai account (Pro plan).</p>
 
         <h4>Step 2 — Load the instructions</h4>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">Paste <code>SKILL.md</code> the same way as Option 1.</p>
+        <p>Paste <code>SKILL.md</code> the same way as Option 1.</p>
 
         <h4>Step 3 — Point Claude at the folder</h4>
-        <p style="color:var(--ink-soft);margin:0 0 10px;">Instead of uploading, give it the folder location:</p>
+        <p>Instead of uploading, give it the folder location:</p>
         <pre><code>Property: [House Name]
 Hook: [One sentence about what makes this property unique]
 Target: [MLS | Instagram | Email | Feature Story | All]
@@ -409,7 +475,7 @@ Photos are in this folder on my Mac:
 Please read all images in that folder and run the hero selection.</code></pre>
 
         <h4>Step 4 — Review together</h4>
-        <p style="color:var(--ink-soft);margin:0;">Claude reads the images directly and produces the report. You can ask follow-up questions, request score breakdowns, or compare two specific photos before confirming.</p>
+        <p>Claude reads the images directly and produces the report. You can ask follow-up questions, request score breakdowns, or compare two specific photos before confirming.</p>
       </div>
     </details>
 
@@ -417,7 +483,7 @@ Please read all images in that folder and run the hero selection.</code></pre>
     <details>
       <summary>Option 3 — Automatic (the <code>wcm</code> pipeline) · ~15 min setup</summary>
       <div class="details-body">
-        <div class="plain" style="margin-top:18px;">
+        <div class="plain" style="margin-top:18px">
           <span class="plain-label">★ In simple terms</span>
           <p>
             The hands-free option. After a one-time setup, a single command processes a whole folder
@@ -435,7 +501,7 @@ Please read all images in that folder and run the hero selection.</code></pre>
         </ul>
 
         <h4>One-time setup</h4>
-        <p style="color:var(--ink-soft);margin:0 0 10px;">In Terminal, from inside the <code>Hero-Image-Agent</code> folder:</p>
+        <p>In Terminal, from inside the <code>Hero-Image-Agent</code> folder:</p>
         <pre><code><span class="c"># Create an isolated workspace and install the tool</span>
 <span class="k">cd</span> Hero-Image-Agent
 <span class="k">python3</span> -m venv .venv
@@ -444,11 +510,11 @@ Please read all images in that folder and run the hero selection.</code></pre>
 
 <span class="c"># Give it your API key (the AI password)</span>
 <span class="k">export</span> ANTHROPIC_API_KEY="sk-ant-..."</code></pre>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">This installs a single command called <code>wcm</code>.</p>
+        <p>This installs a single command called <code>wcm</code>.</p>
 
         <h4>Check everything is ready</h4>
         <pre><code><span class="k">wcm</span> doctor</code></pre>
-        <p style="color:var(--ink-soft);margin:0 0 14px;">Confirms Python, the dependencies, your API key (with a live test) and the skill file are all in place — and tells you exactly how to fix anything that isn't. Run this before your first real run.</p>
+        <p>Confirms Python, the dependencies, your API key (with a live test) and the skill file are all in place — and tells you exactly how to fix anything that isn't. Run this before your first real run.</p>
 
         <h4>Run it on a folder</h4>
         <pre><code><span class="c"># Standard run</span>
@@ -468,13 +534,13 @@ Please read all images in that folder and run the hero selection.</code></pre>
         </ul>
 
         <h4>Hands-free watching (advanced)</h4>
-        <p style="color:var(--ink-soft);margin:0 0 10px;">Point it at a parent folder and it processes each new shoot automatically as it arrives — folders that already have a report are skipped.</p>
+        <p>Point it at a parent folder and it processes each new shoot automatically as it arrives — folders that already have a report are skipped.</p>
         <pre><code><span class="k">wcm</span> watch /path/to/Parent --scan-existing</code></pre>
-        <p style="color:var(--ink-soft);margin:0;">It can also be set to start automatically when the Mac logs in, so it's always running in the background. Full details are in <code>INSTALL.md</code> and <code>PIPELINE_README.md</code>.</p>
+        <p>It can also be set to start automatically when the Mac logs in, so it's always running in the background. Full details are in <code>INSTALL.md</code> and <code>PIPELINE_README.md</code>.</p>
       </div>
     </details>
 
-    <h3 style="margin:40px 0 12px; font-size:20px;">If something looks off</h3>
+    <h3 style="font-size:20px;margin:36px 0 14px">If something looks off</h3>
     <div class="plain">
       <span class="plain-label">★ In simple terms</span>
       <p>Most issues are quick fixes. The most common one for the automatic option is simply re-activating the workspace in a new Terminal window. And if the AI's <em>taste</em> ever feels off, the cure is more examples from Trent — not a code change.</p>
@@ -495,7 +561,7 @@ Please read all images in that folder and run the hero selection.</code></pre>
 
   <!-- ===================== UNDER THE HOOD ===================== -->
   <section id="tech" class="anchor">
-    <p class="section-tag">Under The Hood</p>
+    <div class="section-head">Under The Hood</div>
     <h2>The technology, explained</h2>
     <p class="section-sub">For the curious — a non-technical tour of the moving parts.</p>
 
@@ -511,16 +577,16 @@ Please read all images in that folder and run the hero selection.</code></pre>
 
     <div class="grid grid-2">
       <div class="card">
-        <h3 style="font-size:17px;">Two-stage AI review</h3>
+        <h3 style="font-size:16px">Two-stage AI review</h3>
         <p>A fast model triages the whole batch; a premium model studies the finalists. You get the speed of one and the judgment of the other — without paying premium cost on every photo.</p>
       </div>
       <div class="card">
-        <h3 style="font-size:17px;">Runs where the photos live</h3>
+        <h3 style="font-size:16px">Runs where the photos live</h3>
         <p>Reports are written straight into the property folder (which can be a synced Dropbox or Drive folder). No new system to log into, nothing extra to back up.</p>
       </div>
     </div>
 
-    <div class="table-wrap" style="margin-top:18px;">
+    <div class="table-wrap" style="margin-top:6px">
       <table>
         <thead><tr><th>Part</th><th>What it is</th><th>In plain English</th></tr></thead>
         <tbody>
@@ -536,7 +602,7 @@ Please read all images in that folder and run the hero selection.</code></pre>
 
   <!-- ===================== WORKFLOW ===================== -->
   <section id="workflow" class="anchor">
-    <p class="section-tag">Where It Fits</p>
+    <div class="section-head">Where It Fits</div>
     <h2>The bigger picture</h2>
     <p class="section-sub">Hero selection is one step in West Coast Modern's content pipeline — it unblocks everything downstream.</p>
     <div class="plain">
@@ -551,7 +617,7 @@ Please read all images in that folder and run the hero selection.</code></pre>
 WF2 · Content creation
    → Copy written for each deliverable
    → Hero images matched to copy
-   → Instagram, Email & Website sets prepared
+   → Instagram, Email &amp; Website sets prepared
 
 WF3 · Deployment
    → Squarespace listing published
@@ -561,7 +627,7 @@ WF3 · Deployment
 
   <!-- ===================== TEAM ===================== -->
   <section id="team" class="anchor">
-    <p class="section-tag">Roles</p>
+    <div class="section-head">Roles</div>
     <h2>Who does what</h2>
     <div class="table-wrap">
       <table>
@@ -579,12 +645,19 @@ WF3 · Deployment
 
 </main>
 
-<footer>
-  <div class="f-inner">
-    <p class="tagline">Architecture, not real estate.</p>
-    <small>West Coast Modern — Hero-Image-Agent · Selection that keeps Trent's eye, at a fraction of the time.</small>
-  </div>
-</footer>
+<footer class="report-footer">West Coast Modern — Architecture, not real estate.</footer>
+
+<script>
+(function(){
+  var saved=localStorage.getItem('wcm-theme');
+  if(saved==='dark'){document.documentElement.classList.add('dark');document.getElementById('themeBtn').textContent='Light';}
+})();
+function toggleTheme(){
+  var html=document.documentElement,btn=document.getElementById('themeBtn');
+  if(html.classList.contains('dark')){html.classList.remove('dark');btn.textContent='Dark';localStorage.setItem('wcm-theme','light');}
+  else{html.classList.add('dark');btn.textContent='Light';localStorage.setItem('wcm-theme','dark');}
+}
+</script>
 
 </body>
 </html>
