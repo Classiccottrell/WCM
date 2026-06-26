@@ -107,32 +107,33 @@ hero_report.md only — hero pick + shortlist of 5 with scores
 
 | System | Purpose | Status |
 |---|---|---|
-| Dropbox | Source photos via shared folder link | Requires Dropbox MCP or API key |
 | Claude API | Vision scoring and report generation | Requires Anthropic API key |
-| Google Drive | Destination for hero_report.md | Requires Google Drive MCP |
-| Make.com | Orchestration (trigger on Dropbox upload) | Optional automation layer |
-| Slack | Notify Mica when report is ready | Requires Slack MCP |
+| Local property folder | Source photos and destination for `hero_report.md` | Standard `/WCM/[PropertyName]/photography/` layout |
+| `wcm` CLI | Local orchestration (`run` / `watch` / `doctor`) | `pip install -e .` in `Hero-Image-Agent/` |
+| `launchd` / `cron` | Auto-run `wcm watch` on new folders | Optional automation layer (macOS) |
 
 ---
 
-## Automation Mode (Make.com Trigger)
+## Automation Mode (`wcm watch`)
 
-When fully automated via Make.com, the agent runs on this trigger:
+When running automated via the local watcher, the agent runs on this trigger:
 
 ```
-Trigger: New folder appears in Dropbox at /WCM/[PropertyName]/photography/raw/
-  → Agent receives folder path + property name
-  → Runs full hero selection pass
-  → Outputs hero_report.md to /WCM/[PropertyName]/photography/curated/
-  → Posts Slack message to #photo-curation: "Hero report ready for [PropertyName] — review needed"
-  → Mica reviews report, confirms hero, sends to Trent for final sign-off
+Trigger: New folder appears under the watched parent, e.g. /WCM/[PropertyName]/photography/raw/
+  → Watcher waits ~30s for the copy to finish (folder size stabilises)
+  → Runs the full two-stage hero selection pass
+  → Writes triage_scores.csv + hero_report.md into the property folder
+  → Mica reviews the report, confirms the hero, sends to Trent for final sign-off
 ```
+
+Start it by hand with `wcm watch /path/to/Parent`, or have `launchd` start it at
+login (see `PIPELINE_README.md` and `com.westcoastmodern.heroselect.plist`).
 
 ---
 
 ## Escalation Rules
 
-The agent **must escalate to Trent** (via Slack or flag in report) when:
+The agent **must escalate to Trent** (via a flag in the report) when:
 
 1. No exterior shots exist in the batch
 2. Top two candidates are within 3 points of each other

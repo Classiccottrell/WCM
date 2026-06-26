@@ -11,9 +11,9 @@ There are three ways to use the hero skill:
 |---|---|---|
 | **Manual — claude.ai** | Upload photos directly to claude.ai, paste the SKILL.md, run | Mica doing ad-hoc selections from any device |
 | **Manual — Claude Cowork** | Point Claude at a local folder on your Mac; no uploading required | Trent reviewing a fresh shoot directly from his machine |
-| **Automated — Make.com + Claude API** | Triggered by Dropbox upload, runs headlessly, posts result to Slack | Production pipeline without manual steps |
+| **Automated — `wcm` Python CLI** | One command runs the whole pipeline on a folder and writes the report into it | Hands-free runs, no uploads, no browser |
 
-Start with one of the manual modes. Add Automated Mode once the workflow is validated.
+Start with one of the manual modes. Add Automated Mode (Mode 3, below) once the workflow is validated.
 
 ---
 
@@ -260,16 +260,17 @@ See the main README for launchd auto-start instructions (runs the watcher at log
 
 ---
 
-## Folder Structure (Dropbox)
+## Folder Structure
 
-Set this up before configuring any automated mode:
+The standard layout for each property. Photos go in `/raw/`; point `wcm run` at
+the property folder (or `wcm watch` at the parent of many).
 
 ```
 /WCM/
   /[PropertyName]/
     /photography/
-      /raw/           ← Photographer uploads here (Make.com watches this)
-      /curated/       ← Agent outputs hero report here
+      /raw/           ← Photographer uploads here (point wcm at this folder)
+      /curated/       ← Hero report can be moved here after review
       /final/         ← Mica/Trent place approved selects here
       /sets/
         /mls/
@@ -301,7 +302,11 @@ Set this up before configuring any automated mode:
 ├── TASTE_REFERENCE_TEMPLATE.md   ← Trent fills this out (10 good + 10 not-hero)
 ├── WCM_STYLE_PROFILE.md          ← Brand aesthetic extraction
 ├── INSTALL.md                    ← This file
-├── MAKE_AUTOMATION_SETUP.md      ← Detailed Make.com configuration guide
+├── wcm_cli.py                    ← The `wcm` command (run / watch / doctor)
+├── pyproject.toml                ← Makes `wcm` installable via pip
+├── hero_select.py                ← Two-stage pipeline engine
+├── watch_folder.py               ← Folder watcher
+├── PIPELINE_README.md            ← Technical deep-dive on the pipeline
 └── README.md                     ← Git repo overview
 ```
 

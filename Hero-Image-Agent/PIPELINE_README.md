@@ -4,14 +4,17 @@ A local, two-stage Claude pipeline that turns a folder of 200–400 property
 photos into a production-ready Hero Report — run by hand or automatically when a
 new property folder lands on this machine.
 
-This is the **local** counterpart to the Make.com flow described in the main
-[`README.md`](README.md). No cloud orchestration — just Python on your Mac.
+No cloud orchestration — just Python on your Mac. For plain-language setup
+aimed at non-coders, see [`INSTALL.md`](INSTALL.md); this document is the
+technical deep-dive.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `hero_select.py` | The engine + manual CLI (Stage 1 triage → Stage 2 hero pick) |
+| `wcm_cli.py` | The `wcm` command — `run` / `watch` / `doctor` wrappers around the engine |
+| `pyproject.toml` | Makes `wcm` installable with `pip install -e .` |
+| `hero_select.py` | The engine + raw CLI (Stage 1 triage → Stage 2 hero pick) |
 | `watch_folder.py` | Watcher: runs the engine automatically on new subfolders |
 | `requirements.txt` | `anthropic`, `Pillow`, `watchdog` |
 | `com.westcoastmodern.heroselect.plist` | launchd agent to start the watcher at login |
@@ -40,26 +43,34 @@ won't fit).
 
 ```bash
 cd Hero-Image-Agent
-python3 -m venv .venv && source .venv/bin/activate   # optional but recommended
-pip install -r requirements.txt
+python3 -m venv .venv && source .venv/bin/activate   # recommended
+pip install -e .                                     # installs the `wcm` command
 export ANTHROPIC_API_KEY="sk-ant-..."                # required; engine fails clearly if unset
+wcm doctor                                           # verify everything is ready
 ```
+
+`pip install -e .` installs the `wcm` command. Prefer not to install? The raw
+scripts still run directly with `python3 hero_select.py …` after
+`pip install -r requirements.txt`.
 
 ## Run mode 1 — manual
 
 ```bash
-python3 hero_select.py /path/to/PropertyName
-python3 hero_select.py /path/to/PropertyName --top 12 --workers 5
+wcm run /path/to/PropertyName
+wcm run /path/to/PropertyName --top 12 --workers 5
+# equivalent without installing: python3 hero_select.py /path/to/PropertyName
 ```
 
 Prints per-image triage progress and the top-N, then writes `triage_scores.csv`
-and `hero_report.md` into the property folder.
+and `hero_report.md` into the property folder, followed by a summary of the top
+picks and where the report landed.
 
 | Flag | Default | Meaning |
 |---|---|---|
 | `--top` | 12 | How many top images go to Stage 2 |
 | `--workers` | 5 | Parallel triage workers |
 | `--skill` | `SKILL.md` next to the script | Override the Stage-2 prompt file |
+| `--resume` | off | Reload an existing `triage_scores.csv` and re-run Stage 2 only |
 
 ## Run mode 2 — automatic watcher
 
@@ -68,8 +79,9 @@ contents stop changing for ~30s (copy finished), the engine runs on it
 automatically. Folders that already contain `hero_report.md` are skipped.
 
 ```bash
-python3 watch_folder.py /path/to/Parent
-python3 watch_folder.py /path/to/Parent --top 12 --workers 5 --scan-existing
+wcm watch /path/to/Parent
+wcm watch /path/to/Parent --top 12 --workers 5 --scan-existing
+# equivalent without installing: python3 watch_folder.py /path/to/Parent
 ```
 
 `--scan-existing` also processes pre-existing subfolders that have no report yet.

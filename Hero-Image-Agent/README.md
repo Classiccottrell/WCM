@@ -31,8 +31,10 @@ This skill takes the first pass. Trent reviews 3–5 options, not 300.
 | `AGENT.md` | Extended agent identity, capabilities, automation mode, escalation rules |
 | `TASTE_REFERENCE_TEMPLATE.md` | Template for Trent to document 10 hero + 10 not-hero examples |
 | `WCM_STYLE_PROFILE.md` | Extracted visual taste and brand aesthetic — feeds into skill calibration |
-| `INSTALL.md` | Step-by-step setup for both manual (claude.ai) and automated (Make.com) modes |
-| `PIPELINE_README.md` | **Local** two-stage Python pipeline (`hero_select.py` + `watch_folder.py`) — run by hand or auto-run on new folders via launchd |
+| `INSTALL.md` | Step-by-step setup for all three modes — written for non-coders |
+| `wcm_cli.py` | The `wcm` command — `run`, `watch`, and `doctor` subcommands |
+| `pyproject.toml` | Makes `wcm` installable with `pip install -e .` |
+| `PIPELINE_README.md` | Technical deep-dive on the two-stage Python pipeline (`hero_select.py` + `watch_folder.py`) — run by hand, via `wcm`, or auto-run on new folders via launchd |
 
 ---
 
@@ -45,25 +47,26 @@ This skill takes the first pass. Trent reviews 3–5 options, not 300.
 5. Type: `Property: [House Name]. Run hero selection.`
 6. Review the Hero Report
 
-That's it. No API keys, no Make.com, no configuration.
+That's it. No API keys, no install, no configuration.
 
 ---
 
-## Automated Mode (Make.com Pipeline) <-- Out Side Current SOW
+## Automated Mode (`wcm` Python pipeline)
 
-For production use — triggers automatically when a photographer uploads to Dropbox:
+For hands-free use — run hero selection straight from a folder on your machine, no uploading:
 
 ```
-Photographer drops photos in Dropbox
-  → Make.com detects new folder
-  → Sends images to Claude API
-  → Claude runs hero selection
-  → Report saved to Google Drive
-  → Mica notified in Slack
+Photos land in a property folder
+  → wcm run /path/to/PropertyName
+  → Stage 1 scores every image (fast model, in parallel)
+  → Stage 2 sends the top picks to a stronger model
+  → triage_scores.csv + hero_report.md written into the folder
   → Trent reviews 3 options instead of 300
 ```
 
-See `INSTALL.md` for full configuration instructions.
+Or point `wcm watch` at a parent folder and it processes each new shoot automatically as it lands.
+
+See `INSTALL.md` for plain-language setup and `PIPELINE_README.md` for the technical deep-dive.
 
 ---
 
@@ -93,16 +96,16 @@ Even 3–4 examples help. 10 examples produces output that's very close to Trent
 
 ---
 
-## Tech Stack <-- For Auto Mode
+## Tech Stack
 
 | Component | Tool |
 |---|---|
-| AI Vision | Claude API (claude-opus-4-5) via Anthropic |
-| Orchestration | Make.com |
-| Photo storage | Dropbox |
-| Report storage | Google Drive |
-| Notifications | Slack |
-| Interface (manual) | claude.ai |
+| AI Vision | Claude API (`claude-opus-4-5` + `claude-haiku-4-5`) via Anthropic |
+| Automated interface | `wcm` CLI — local Python (`hero_select.py` + `watch_folder.py`) |
+| Auto-run on new folders | macOS `launchd` (or `cron`) running `wcm watch` |
+| Photo storage | Local folder (e.g. a synced Dropbox/Drive folder) |
+| Report storage | The property folder itself (`hero_report.md`) |
+| Interface (manual) | claude.ai / Claude Cowork |
 
 ---
 
