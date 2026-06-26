@@ -159,15 +159,29 @@ def cmd_run(args):
         )
         return 3
 
+    if not images and args.resume:
+        existing_csv = folder / hs.CSV_NAME
+        if not existing_csv.exists():
+            sys.stderr.write(
+                "ERROR: --resume requested but no %s found in %s and no images to triage.\n"
+                "       fix: remove --resume to run a full triage, or add images to the folder\n"
+                % (hs.CSV_NAME, folder)
+            )
+            return 3
+
     client = hs.make_client()
-    hs.process_folder(
-        client, folder,
-        top_n=args.top,
-        workers=args.workers,
-        skill_path=args.skill,
-        images=images if images else None,
-        resume=args.resume,
-    )
+    try:
+        hs.process_folder(
+            client, folder,
+            top_n=args.top,
+            workers=args.workers,
+            skill_path=args.skill,
+            images=images if images else None,
+            resume=args.resume,
+        )
+    except Exception as e:
+        sys.stderr.write("ERROR: %s\n       run 'wcm doctor' to check prerequisites\n" % e)
+        return 1
     return 0
 
 
