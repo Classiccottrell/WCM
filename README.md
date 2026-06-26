@@ -20,7 +20,7 @@ This repository automates hero image selection for West Coast Modern property ph
 
 ## Mode 1 — Manual (claude.ai)
 
-No setup required. Best for Mica running a selection session from any device or when photos are already in Google Drive / Dropbox.
+No setup required. Best for running a selection session from any device or when photos are already in Google Drive / Dropbox.
 
 1. Open [claude.ai](https://claude.ai) (Pro plan recommended for large batches)
 2. Paste the full contents of `Hero-Image-Agent/SKILL.md` into a new conversation with this prompt:
