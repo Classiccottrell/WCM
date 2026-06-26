@@ -2,26 +2,132 @@
 """wcm — West Coast Modern hero-image pipeline CLI.
 
 Subcommands:
-  run    Run the two-stage pipeline on a single property folder.
-  watch  Watch a parent directory and auto-process new property subfolders.
+  doctor  Pre-flight check: API key, SKILL.md, Python version, dependencies.
+  run     Run the two-stage pipeline on a single property folder.
+  watch   Watch a parent directory and auto-process new property subfolders.
 
 Install:
     pip install -e Hero-Image-Agent/
     export ANTHROPIC_API_KEY="sk-ant-..."
 
 Usage:
+    wcm doctor
     wcm run /path/to/PropertyName [--top 12] [--workers 5] [--resume]
     wcm watch /path/to/Parent [--top 12] [--workers 5] [--scan-existing]
 """
 from __future__ import annotations
 
 import argparse
+import importlib
+import os
 import sys
 import threading
 import time
 from pathlib import Path
 
 import hero_select as hs
+
+
+# ---------------------------------------------------------------------------
+# TTY-aware color helpers (mirrors hero_select.py; respects NO_COLOR)
+# ---------------------------------------------------------------------------
+
+def _use_color():
+    return sys.stdout.isatty() and not os.environ.get("NO_COLOR")
+
+def _c(code, text):
+    return (code + text + "\033[0m") if _use_color() else text
+
+_BOLD   = "\033[1m"
+_DIM    = "\033[2m"
+_GREEN  = "\033[32m"
+_YELLOW = "\033[33m"
+_RED    = "\033[31m"
+_CYAN   = "\033[36m"
+
+
+# ---------------------------------------------------------------------------
+# doctor
+# ---------------------------------------------------------------------------
+
+def cmd_doctor(args):
+    """Pre-flight check: Python, dependencies, API key, SKILL.md, API auth."""
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
+    all_ok = True
+
+    def check(label, passed, fix=None):
+        nonlocal all_ok
+        if passed:
+            print(_c(_GREEN, "  ✓") + "  " + label)
+        else:
+            all_ok = False
+            print(_c(_RED,   "  ✗") + "  " + label)
+            if fix:
+                print("       fix: " + _c(_YELLOW, fix))
+
+    print(_c(_BOLD, "\nwcm doctor — pre-flight checks\n"))
+
+    # 1. Python version
+    v = sys.version_info
+    check(
+        "Python %d.%d.%d (need ≥ 3.9)" % (v.major, v.minor, v.micro),
+        (v.major, v.minor) >= (3, 9),
+        fix="Download Python 3.9+ from https://python.org/downloads",
+    )
+
+    # 2. Dependencies
+    for pkg, mod in [("anthropic", "anthropic"), ("Pillow", "PIL"), ("watchdog", "watchdog")]:
+        try:
+            importlib.import_module(mod)
+            check("%s installed" % pkg, True)
+        except ImportError:
+            check("%s installed" % pkg, False, fix="pip install %s" % pkg)
+
+    # 3. API key present
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    check(
+        "ANTHROPIC_API_KEY is set",
+        bool(key),
+        fix='export ANTHROPIC_API_KEY="sk-ant-..."',
+    )
+
+    # 4. API key authenticates (only if set and anthropic is importable)
+    if key:
+        try:
+            import anthropic as _ant
+            client = _ant.Anthropic(api_key=key, max_retries=0)
+            client.models.list()
+            check("API key authenticates with Anthropic", True)
+        except Exception as e:
+            check(
+                "API key authenticates with Anthropic",
+                False,
+                fix="Check your key at https://console.anthropic.com — %s" % type(e).__name__,
+            )
+
+    # 5. SKILL.md present
+    script_dir = Path(hs.__file__).resolve().parent
+    skill_md = script_dir / hs.SKILL_FILENAME
+    check(
+        "SKILL.md found at %s" % skill_md,
+        skill_md.is_file(),
+        fix="Ensure SKILL.md exists in %s" % script_dir,
+    )
+
+    print()
+    if all_ok:
+        print(_c(_GREEN, "  All checks passed.") + " Ready to run wcm.")
+        print("  Next: " + _c(_CYAN, "wcm run /path/to/PropertyName"))
+    else:
+        print(_c(_RED, "  One or more checks failed.") + " Fix the issues above, then re-run:")
+        print("       " + _c(_CYAN, "wcm doctor"))
+    print()
+
+    return 0 if all_ok else 78  # 78 = EX_CONFIG (sysexits.h)
 
 
 # ---------------------------------------------------------------------------
@@ -36,8 +142,11 @@ def cmd_run(args):
 
     folder = Path(args.folder)
     if not folder.is_dir():
-        sys.stderr.write("ERROR: not a directory: %s\n" % folder)
-        return 1
+        sys.stderr.write(
+            "ERROR: not a directory: %s\n"
+            "       fix: check the path, or run 'wcm doctor'\n" % folder
+        )
+        return 3  # EX_NOINPUT — resource not found
 
     images = hs.find_images(folder)
     print("Found %d image(s) in %s" % (len(images), folder))
@@ -45,9 +154,10 @@ def cmd_run(args):
     if not images and not args.resume:
         sys.stderr.write(
             "ERROR: no supported images (%s) in %s\n"
+            "       fix: check the folder contents, or use --resume if triage already ran\n"
             % (", ".join(sorted(hs.IMAGE_EXTS)), folder)
         )
-        return 1
+        return 3
 
     client = hs.make_client()
     hs.process_folder(
@@ -76,8 +186,11 @@ def cmd_watch(args):
 
     parent = Path(args.parent)
     if not parent.is_dir():
-        sys.stderr.write("ERROR: not a directory: %s\n" % parent)
-        return 1
+        sys.stderr.write(
+            "ERROR: not a directory: %s\n"
+            "       fix: check the path\n" % parent
+        )
+        return 3
 
     client = hs.make_client()
 
@@ -119,6 +232,7 @@ def main(argv=None):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
+            "  wcm doctor\n"
             "  wcm run /shoots/HarbourView --top 20 --workers 8\n"
             "  wcm run /shoots/HarbourView --resume\n"
             "  wcm watch /shoots --scan-existing\n"
@@ -127,6 +241,23 @@ def main(argv=None):
     )
     sub = ap.add_subparsers(dest="command", metavar="COMMAND")
     sub.required = True
+
+    # -- doctor --
+    dp = sub.add_parser(
+        "doctor",
+        help="Check all prerequisites before your first run.",
+        description=(
+            "Validates:\n"
+            "  • Python version (need 3.9+)\n"
+            "  • All three dependencies installed (anthropic, Pillow, watchdog)\n"
+            "  • ANTHROPIC_API_KEY is set\n"
+            "  • API key authenticates with Anthropic\n"
+            "  • SKILL.md is present next to hero_select.py\n\n"
+            "Exit codes: 0 = all clear, 78 = configuration problem.\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    dp.set_defaults(func=cmd_doctor)
 
     # -- run --
     rp = sub.add_parser(

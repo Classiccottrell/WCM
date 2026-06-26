@@ -66,6 +66,36 @@ OUTPUT_NAMES = {REPORT_NAME, CSV_NAME}
 
 SKILL_FILENAME = "SKILL.md"
 
+# ────────────────────────────────────────────────────────────────────────────
+# TTY-aware color helpers
+# Respects NO_COLOR (https://no-color.org) and non-TTY pipes automatically.
+# ────────────────────────────────────────────────────────────────────────────
+def _use_color():
+    return sys.stdout.isatty() and not os.environ.get("NO_COLOR")
+
+def _c(code, text):
+    return (code + text + "\033[0m") if _use_color() else text
+
+_BOLD   = "\033[1m"
+_DIM    = "\033[2m"
+_GREEN  = "\033[32m"
+_YELLOW = "\033[33m"
+_CYAN   = "\033[36m"
+
+
+def _fmt_score(score):
+    s = "%2d/60" % score
+    if score >= 45:
+        return _c(_GREEN + _BOLD, s)
+    if score >= 30:
+        return _c(_YELLOW, s)
+    return _c(_DIM, s)
+
+
+def _fmt_tag(is_exterior):
+    return _c(_CYAN, "EXT") if is_exterior else _c(_DIM, "int")
+
+
 # Pillow resample constant moved namespaces across versions
 try:
     _RESAMPLE = Image.Resampling.LANCZOS
@@ -112,8 +142,9 @@ def make_client():
             "ERROR: ANTHROPIC_API_KEY is not set.\n"
             "Set it before running, e.g.:\n"
             '    export ANTHROPIC_API_KEY="sk-ant-..."\n'
+            "Run 'wcm doctor' to check all prerequisites.\n"
         )
-        raise SystemExit(2)
+        raise SystemExit(78)  # EX_CONFIG — configuration error
     return anthropic.Anthropic(api_key=key, max_retries=0)
 
 
@@ -266,9 +297,9 @@ def run_triage(client, paths, workers):
             r = fut.result()
             results[i] = r
             done += 1
-            tag = "EXT" if r["isExterior"] else "int"
-            print("  [%d/%d] %-40s %2d/60 %s — %s"
-                  % (done, n, r["file"][:40], r["score"], tag, r["note"]))
+            print("  [%d/%d] %-40s %s %s  %s"
+                  % (done, n, r["file"][:40],
+                     _fmt_score(r["score"]), _fmt_tag(r["isExterior"]), r["note"]))
     return [r for r in results if r is not None]
 
 
@@ -374,6 +405,34 @@ def load_csv(path):
 
 
 # ----------------------------------------------------------------------------
+# End-of-run summary
+# ----------------------------------------------------------------------------
+def _print_summary(all_results, top_results, report_path, elapsed):
+    """Print a structured completion summary with next-action hint."""
+    mins, secs = divmod(int(elapsed), 60)
+    elapsed_str = ("%dm %ds" % (mins, secs)) if mins else ("%ds" % secs)
+    sep = _c(_DIM, "─" * 60)
+
+    print("\n" + sep)
+    print(_c(_BOLD, "  Hero Selection Complete"))
+    print(sep)
+    print("  Images triaged  : " + _c(_BOLD, str(len(all_results))))
+    print("  Elapsed         : " + elapsed_str)
+    print()
+    print("  " + _c(_BOLD, "Top picks:"))
+    for i, r in enumerate(top_results[:3], 1):
+        print("  %d. %-38s %s %s" % (
+            i, r["file"][:38],
+            _fmt_score(r["score"]),
+            _fmt_tag(r["isExterior"]),
+        ))
+    print()
+    print("  Report written  → " + _c(_CYAN, str(report_path)))
+    print("  Next            → open '%s'" % report_path)
+    print(sep)
+
+
+# ----------------------------------------------------------------------------
 # Orchestration
 # ----------------------------------------------------------------------------
 def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
@@ -383,6 +442,7 @@ def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
     resume=True: if triage_scores.csv already exists, reload Stage 1 from it and
     skip directly to Stage 2. Useful when Stage 1 finished but Stage 2 failed.
     """
+    t0 = time.time()
     folder = Path(folder)
     report_path = folder / REPORT_NAME
     existing_csv = folder / CSV_NAME
@@ -429,14 +489,15 @@ def process_folder(client, folder, top_n=DEFAULT_TOP_N, workers=DEFAULT_WORKERS,
     top = results[:top_n]
     print("\nTop %d candidates:" % len(top))
     for rank, r in enumerate(top, 1):
-        print("  %2d. %-40s %2d/60 %s"
-              % (rank, r["file"][:40], r["score"],
-                 "EXT" if r["isExterior"] else "int"))
+        print("  %2d. %-40s %s %s"
+              % (rank, r["file"][:40],
+                 _fmt_score(r["score"]), _fmt_tag(r["isExterior"])))
 
     print("\nStage 2 — hero pick with %s (%d image(s))..." % (HERO_MODEL, len(top)))
     report = stage2_hero(client, folder, top, len(results), skill_text, property_name)
     report_path.write_text(report, encoding="utf-8")
     print("Wrote %s" % report_path)
+    _print_summary(results, top, report_path, time.time() - t0)
     return report_path
 
 
