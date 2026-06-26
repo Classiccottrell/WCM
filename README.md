@@ -1,14 +1,27 @@
-# West Coast Modern — Hero Image Selection Pipeline
+# West Coast Modern — Hero-Image-Agent
 
-This repository automates hero image selection for West Coast Modern property photography. A two-stage AI pipeline turns 200–400 raw photos into a production-ready Hero Report in one command.
+A turnkey hero image selection system for West Coast Modern property content. This product helps transform a raw shoot into a polished, client-ready hero image recommendation package with minimal manual review.
 
-**What it does:**
-1. **Stage 1 — Triage** — every image is scored 0–60 for WCM hero fit using a fast model in parallel. Results go to `triage_scores.csv`.
-2. **Stage 2 — Hero Pick** — the top-N scoring images are sent at full quality to a stronger model with the full `SKILL.md` rubric. Output is `hero_report.md`.
+The workflow is designed to be simple, repeatable, and professional for clients: a photographer drops in the images, the agent triages the full set, and the team receives a curated hero report with top candidates, a shortlist, and clear production guidance.
+
+**What the client receives:**
+1. **Fast triage** — every image is scored for fit against the WCM visual standard.
+2. **Curated hero recommendations** — the strongest candidates are surfaced for review.
+3. **Production-ready output** — the system generates a hero report and supporting shortlist without the team needing to manually review hundreds of photos.
 
 ---
 
-## Three Ways to Use This
+## How the Client Gets the Agent
+
+The Hero-Image-Agent is delivered as part of the WCM workflow package and can be accessed in one of three ways:
+
+1. **Manual Claude workflow** — quickest option for ad-hoc client sessions with no local setup.
+2. **Local Mac workflow** — ideal for a studio or production team that wants the agent running directly on a machine.
+3. **Automated pipeline** — best for recurring shoots where images arrive in a known folder structure and the process should run hands-off.
+
+---
+
+## Delivery Options
 
 | Mode | Best for | Setup time |
 |---|---|---|

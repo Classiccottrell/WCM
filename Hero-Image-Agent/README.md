@@ -1,17 +1,28 @@
 # wcm-hero-skill
-### West Coast Modern — AI Hero Image Selector
+### West Coast Modern Hero-Image-Agent
 
-> Takes Trent from 300 photos to 5 hero candidates without him touching a folder.
+> A client-ready AI assistant that turns a full property shoot into a curated hero image package in minutes.
 
 ---
 
 ## What This Is
 
-A skill + agent system that uses Claude's vision AI to review batches of property photography and select the best hero image — the lead shot that goes on the website, email, Instagram, and MLS listing.
+The Hero-Image-Agent is a polished, repeatable workflow for selecting the strongest hero images for luxury property marketing. It reviews a full batch of photography, scores each image against the WCM brand standard, and returns a professional hero report with top candidates and supporting recommendations.
 
-Built for anyone to run independently. Designed around **Trent's** eye. Final sign-off always stays with Trent.
+It is built to be simple for the client to use while staying aligned with Trent's visual taste. The final decision remains with the client or creative lead, but the agent handles the first pass quickly and consistently.
 
-The system knows what West Coast Modern looks for: architect-designed homes with cinematic West Coast light, warm materiality, breathing room, and an emotional hook. It scores every image against a rubric and returns a production-ready report.
+The system is tuned for the qualities that matter most to West Coast Modern: architect-designed homes, cinematic light, warm materiality, calm composition, and an emotional hook.
+
+---
+
+## How to Get the Agent
+
+The agent is delivered as part of the WCM project package and can be accessed in one of two ways:
+
+1. **Manual use** — open the project folder, load the skill into Claude, and run the selection session.
+2. **Local automation** — run the Python pipeline on a Mac so the process works directly from the property folder.
+
+For most clients, the manual workflow is the fastest way to get started. For recurring shoots, the local automation workflow is the more scalable option.
 
 ---
 
@@ -36,7 +47,7 @@ This skill takes the first pass. Trent reviews 3–5 options, not 300.
 
 ---
 
-## Quick Start (Manual Mode — No Setup Required)
+## Quick Start (Client-Friendly Manual Mode)
 
 1. Open [claude.ai](https://claude.ai)
 2. Paste the contents of `SKILL.md` into Claude
