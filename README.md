@@ -89,25 +89,35 @@ Claude Cowork reads images directly from that path. You can ask follow-up questi
 
 ---
 
-## Mode 3 — Automated Python Pipeline
+## Mode 3 — Automated Python Pipeline (`wcm` command)
 
 Runs entirely from the command line. No manual uploads. Outputs land directly in the property folder.
 
-### Setup
+> **New here? Not a coder?** Follow [`Hero-Image-Agent/INSTALL.md`](Hero-Image-Agent/INSTALL.md) — it walks through every step in plain language, including how to open Terminal.
+
+### Setup (once)
 
 ```bash
 cd Hero-Image-Agent
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-The API key is required. The script exits clearly with instructions if it is not set.
+This installs a single command, `wcm`. The API key is required.
+
+### Check everything is ready
+
+```bash
+wcm doctor
+```
+
+Confirms Python, dependencies, your API key (with a live test), and `SKILL.md` are all in place — and tells you exactly how to fix anything that isn't. Run this before your first real run.
 
 ### Run on a single folder
 
 ```bash
-python3 hero_select.py /path/to/PropertyName
+wcm run /path/to/PropertyName
 ```
 
 **All options:**
@@ -123,36 +133,38 @@ python3 hero_select.py /path/to/PropertyName
 
 ```bash
 # Standard run
-python3 hero_select.py /path/to/PropertyName
+wcm run /path/to/PropertyName
 
 # Review more candidates in Stage 2, more parallelism
-python3 hero_select.py /path/to/PropertyName --top 20 --workers 10
+wcm run /path/to/PropertyName --top 20 --workers 10
 
 # Stage 1 already ran but Stage 2 failed — pick up where you left off
-python3 hero_select.py /path/to/PropertyName --resume
+wcm run /path/to/PropertyName --resume
 
 # Use a different skill file
-python3 hero_select.py /path/to/PropertyName --skill /path/to/custom-SKILL.md
+wcm run /path/to/PropertyName --skill /path/to/custom-SKILL.md
 ```
 
 **Outputs written into the property folder:**
 - `triage_scores.csv` — every image with `file, score, isExterior, note`, sorted highest to lowest
 - `hero_report.md` — the full Hero Report (hero horizontal, vertical alt, hero 2, shortlist, tour sequence, cuts, flags)
 
+When the run finishes, a summary prints the top picks, where the report was saved, and how long it took.
+
 ### Watch a parent folder (automatic mode)
 
-`watch_folder.py` monitors a parent directory. When a new property subfolder appears and its contents stop changing for ~30 seconds (copy finished), the pipeline runs automatically. Folders that already have `hero_report.md` are skipped.
+`wcm watch` monitors a parent directory. When a new property subfolder appears and its contents stop changing for ~30 seconds (copy finished), the pipeline runs automatically. Folders that already have `hero_report.md` are skipped.
 
 ```bash
-python3 watch_folder.py /path/to/Parent
+wcm watch /path/to/Parent
 ```
 
 **All options:**
 
 | Flag | Default | Description |
 |---|---|---|
-| `--top N` | `12` | Passed through to `hero_select.py` |
-| `--workers N` | `5` | Passed through to `hero_select.py` |
+| `--top N` | `12` | Passed through to each run |
+| `--workers N` | `5` | Passed through to each run |
 | `--skill PATH` | `SKILL.md` next to the script | Override the Stage-2 prompt file |
 | `--scan-existing` | off | Also process pre-existing subfolders that have no report yet |
 
@@ -160,14 +172,16 @@ python3 watch_folder.py /path/to/Parent
 
 ```bash
 # Watch for new folders
-python3 watch_folder.py /path/to/Parent
+wcm watch /path/to/Parent
 
 # Watch AND process any existing unfinished folders on start
-python3 watch_folder.py /path/to/Parent --scan-existing
+wcm watch /path/to/Parent --scan-existing
 
 # Watch with custom settings
-python3 watch_folder.py /path/to/Parent --top 20 --workers 8 --scan-existing
+wcm watch /path/to/Parent --top 20 --workers 8 --scan-existing
 ```
+
+> **Tip:** `wcm` only exists after you run `source .venv/bin/activate` in that Terminal window. The raw scripts (`python3 hero_select.py …`, `python3 watch_folder.py …`) still work too if you prefer.
 
 ### Start the watcher automatically at login (macOS launchd)
 
@@ -227,8 +241,9 @@ launchctl unload ~/Library/LaunchAgents/com.westcoastmodern.heroselect.plist
 ├── AGENT.md                              ← Agent identity and capabilities
 ├── TASTE_REFERENCE_TEMPLATE.md          ← Trent fills this in (10 good + 10 not-hero)
 ├── WCM_STYLE_PROFILE.md                 ← Brand aesthetic reference
+├── wcm_cli.py                            ← The `wcm` command (run / watch / doctor)
+├── pyproject.toml                        ← Makes `wcm` installable via pip
 ├── INSTALL.md                            ← Detailed setup instructions per mode
-├── MAKE_AUTOMATION_SETUP.md             ← Make.com + Dropbox automation guide
 └── PIPELINE_README.md                   ← Technical deep-dive on the Python pipeline
 ```
 
