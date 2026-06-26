@@ -158,10 +158,13 @@ cd /path/to/WCM/Hero-Image-Agent
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip setuptools
 pip install -e .
 ```
 
 This installs the `wcm` command and all dependencies (`anthropic`, `Pillow`, `watchdog`).
+
+> **Note:** The `pip install --upgrade pip setuptools` line is required, not optional. This project is configured via `pyproject.toml` only (no `setup.py`), so editable installs need pip ≥ 21.3 and setuptools ≥ 64. The Python shipped with macOS/Xcode bundles older versions (pip 21.2.4, setuptools 58), which fail with `Directory cannot be installed in editable mode`.
 
 **Verify it worked:**
 
@@ -252,7 +255,8 @@ See the main README for launchd auto-start instructions (runs the watcher at log
 
 | Symptom | Fix |
 |---|---|
-| `command not found: wcm` | Run `source .venv/bin/activate` first |
+| `command not found: wcm` | Activate the venv (`source .venv/bin/activate`); if still missing, the package was never installed — run `pip install -e .` |
+| `Directory cannot be installed in editable mode` | pip/setuptools too old. Run `pip install --upgrade pip setuptools`, then `pip install -e .` |
 | `ERROR: ANTHROPIC_API_KEY is not set` | Run `export ANTHROPIC_API_KEY="sk-ant-..."` |
 | `No images found` | Check the folder path; images must be directly inside it (not in subfolders) |
 | Stage 2 timeout / error | Re-run with `--resume` to skip Stage 1 and retry Stage 2 only |
@@ -334,6 +338,7 @@ From inside the `WCM/Hero-Image-Agent/` directory:
 
 ```bash
 python3 -m venv .venv
+.venv/bin/pip install --upgrade pip setuptools
 .venv/bin/pip install -e .
 ```
 
